@@ -1,0 +1,206 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auhenticate</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
+    <style>
+        #LoginForm{
+            width: 40%;
+            max-width: 50%;
+            margin-left: 30%;
+            margin-top:5%;
+        }
+        form button{
+            width: 30%;
+            margin-left: 35%;
+        }
+        #signupForm{
+            width: 40%;
+            max-width: 50%;
+            margin-left: 30%;
+            margin-top:5%;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <div id="LoginForm" class="shadow-lg p-3">
+        <div  class="p-2 text-center font-weight-bold" style="font-size: larger;text-decoration: underline;">Login to Mawingu Cloud</div>
+        <form action="/users/login" method="post">
+            <div id="loginState">
+
+                <% if (message.length > 0) { %>
+                   <div class="alert alert-danger"><%= message %></div>
+                <% } %>
+            </div>
+
+            <div id="form-group">
+                <label style="font-size: small;" for="userEmail">Email Address</label>
+                <input id="useremail" name="username" type="email" required placeholder="Enter Your Email" class="form-control">
+            </div>
+
+
+
+            <label style="font-size: small;" for="userEmail">Password</label>
+            <div class="input-group mb-3">
+                <input id="userpassword" name="password" type="password" required placeholder="Enter Your Password" class="form-control">
+                <div  class="input-group-append">
+                    <span data-toggleState='hide' class="input-group-text passwordToggle"><i class="fa fa-eye"></i></span>
+                </div>
+            </div>
+
+
+            <button class="btn btn-sm btn-info text-center">Login</button><br>
+
+        </form>
+        <div class="text-info" style="cursor: pointer;text-decoration: underline;" id="signupbtn">Dont have an account ?</div><br>
+        <!-- <a href="">Fogort Password ?</a> -->
+
+
+    </div>
+    <div  id="signupForm" class="shadow-lg d-none p-3" >
+        <div  class="p-2 text-center font-weight-bold" style="font-size: larger;text-decoration: underline;">SignUp to Mawingu Cloud</div>
+
+        <form>
+            <div style="font-size: small;" class="mb-2" id="signupState">
+            </div>
+            <label for="fullname" class="pb-0 mb-0" style="font-size: small;">Full Name  <span class="text-danger"><sup>*</sup></span></label>
+            <input  type="text" name="fullname" id="fullname" placeholder="Fullname" class="form-control mb-2">
+
+            <label for="userEmail" class="pb-0 mb-0" style="font-size: small;">Email <span class="text-danger"><sup>*</sup></span></label>
+            <input name="email" id="userEmail"  class="form-control mb-2" type="email" required placeholder="Email address">
+            <label class="pb-0 mb-0" style="font-size: small;"> Choose Password <span class="text-danger"><sup>*</sup></span></label>
+
+            <div class="input-group mb-2">
+                <input name="password" class="form-control" required placeholder="Choose Password" type="password">
+                <div class="input-group-append">
+                    <div  data-toggleState='hide' class="input-group-text passwordToggle"><i class="fas fa-eye"></i></div>
+                </div>
+            </div>
+            <label class="pb-0 mb-0" style="font-size: small;"> Confirm Password <span class="text-danger"><sup>*</sup></span></label>
+
+            <div class="input-group mb-2">
+                <input name="confirmpassword" required class="form-control" placeholder="Confirm Password" type="password">
+                <div class="input-group-append">
+                    <div  data-toggleState='hide' class="input-group-text passwordToggle"><i class="fas fa-eye"></i></div>
+                </div>
+            </div>
+
+            <button class="btn-sm btn btn-info">Create Account</button>
+
+
+            <br><br><div  class="text-info" style="cursor: pointer;text-decoration: underline;" id="loginbtn">Login Instead</div>
+
+
+        </form>
+    </div>
+
+</div>
+
+<script src="javascripts/jquery.min.js"></script>
+<script>
+    $(document).ready(()=>{
+        //Toggle Login and Signup form
+        let loginForm = $('#LoginForm')
+        let signupForm = $('#signupForm')
+        let loginbtn = $('#loginbtn')
+        let signupbtn = $('#signupbtn')
+        let passwordToggle = document.querySelectorAll('.passwordToggle')
+
+        loginbtn.on('click',()=>{
+            loginForm.removeClass('d-none')
+            signupForm.addClass('d-none')
+        })
+        signupbtn.on('click',()=>{
+
+            signupForm.removeClass('d-none')
+            loginForm.addClass('d-none')
+        })
+
+
+        //Form validation for Registration and password show toggle
+        passwordToggle.forEach((toggle)=>{
+            toggle.addEventListener('click',function(){
+                let passworField = toggle.parentElement.parentElement.firstElementChild
+                if (this.getAttribute('data-toggleState')== 'hide'){
+                    //show password
+
+                    passworField.type='text'
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>'
+                    this.setAttribute('data-toggleState','show')
+                }else{
+                    //hide password
+                    passworField.type='password'
+                    this.innerHTML = '<i class="fas fa-eye"></i>'
+                    this.setAttribute('data-toggleState','hide')
+                }
+            })
+        })
+
+        signupForm.submit((e)=>{
+            let signupState = $('#signupState')
+            e.preventDefault()
+            let fullname = $('#signupForm input[name="fullname"]').val()
+            let email = $('#signupForm input[name="email"]').val()
+            let password = $('#signupForm input[name="password"]').val()
+            let confirmPassword  = $('#signupForm input[name="confirmpassword"]').val()
+
+
+            let hasAlphabet = /[a-zA-Z]/
+            let hasNumbers = /[0-9]/
+
+            let errorsBucket  =[]
+            if (fullname.length < 4 || /[0-9]/.test(fullname)==true || /[@,!,#,$,%,6,&,*,',",;]/.test(fullname)==true){
+                errorsBucket.push("Enter a valid FullName")
+
+            }
+            if (password.length<6 || hasAlphabet.test(password)==false || hasNumbers.test(password)==false ){
+                errorsBucket.push("The password does not meet minimum requirements of atleast 6 charachters and include letters and numbers")
+
+            }
+            if (confirmPassword != password){
+                errorsBucket.push("Confirmation password must match the desired passwword")
+            }
+
+
+            if (errorsBucket.length >0){
+                //we have some errors
+                signupState.removeClass('text-success').addClass('text-danger').html('<span style="text-decoration:underline;font-weight:bold">Signup Failed ! Correct the error Below </span><br>-'+errorsBucket.join('<br>-'))
+
+            }else {
+                //process the form
+                signupState.addClass('text-success').removeClass('text-danger').html('<span style="font-weight:bold">Processing your Registration Request. Please wait <i class="fa fa-spin fa-spinner"></i></span>')
+                let formData =  $('#signupForm form').serialize()
+
+                $.post('/users/register',formData,()=>{
+                    signupState.addClass('text-success').removeClass('text-danger').html('<span style="font-weight:bold">Registartion was succesfull !</span>')
+
+                }).fail((xhr,statustext,error)=>{
+                    let message_to_send = 'error'
+
+                    if (xhr.status==403){
+                        message_to_send= 'The email address you provided is already associated with another account'
+                    }else if (xhr.status==401){
+                        message_to_send=xhr.responseText
+                    }else{
+                        message_to_send ='Something went wrong.Please try again !'
+                    }
+                    signupState.removeClass('text-success').addClass('text-danger').html('<span style="text-decoration:underline;font-weight:bold">'+message_to_send+'<span>')
+                })
+
+
+            }
+
+
+        })
+
+
+    })
+
+</script>
+</body>
+</html>

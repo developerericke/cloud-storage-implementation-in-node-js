@@ -1,0 +1,22 @@
+#trash-section{
+   
+    width:100%;
+}
+#deleted-items{
+    width: 98%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:flex-start;
+    align-items: center;
+    margin-left: 1%;
+}
+.deletedItem{
+    flex:0 0 15%;
+    min-height:70px;
+    text-align: center;
+    background-color: whitesmoke;
+    border:1px solid wheat;
+    border-radius: 0 0 15px 0;
+    margin-left: 4%;
+    margin-bottom: 3%;
+}

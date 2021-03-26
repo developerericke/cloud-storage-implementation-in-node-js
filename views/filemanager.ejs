@@ -1,0 +1,591 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFiles - Mawingu CLoud Storage</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+
+    <link href="/stylesheets/index.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div  class=" container-fluid p-0 m-0 ">
+    <div id="content-wrapper" class="p-0 m-0">
+        <%- include('./partials/nav');%>
+        <div id="content-section" class=" content-wrapper-itm ">
+            <div id="section-actionbar">
+
+                <img class="section-actionbar-itm" src="/images/logo.png" alt="logo">
+                <div style="cursor: pointer;"  data-target="#fileUploadModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-cloud-upload-alt"></i> Upload</div>
+                <div class="section-actionbar-itm"><i class="fas fa-sort"></i> Sort</div>
+                <div class="section-actionbar-itm"><i class="fas fa-filter"></i> Filter</div>
+                <div style="cursor: pointer;" data-target="#newFolderModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-folder-plus"></i> New</div>
+                <div class="section-actionbar-itm">
+                    <input type="search" class="form-control p-0 m-0 text-center" style="font-size: small;" placeholder="Search Files and Folders"></div>
+
+
+            </div>
+            <div id="directory-tree">
+                <div class="title_sub_sec"><i class="fas text-black-50 fa-folder"></i> My Folders</div>
+                <ul>
+                    <!-- This is the root Folder,Cannot be changed  -->
+
+                    <li data-folderName="home"  class="directorymain mt-2"><i class="fas fa-folder"></i> <span class="direcName"> Home <span class="deleteFolder"></span> </span>
+                        <% (home_folder_items).forEach((item)=>{ %>
+                        <div class="dir-Contents">
+                            <div date-Filextension="<%=item.extension%>" data-fileName="<%=item.name%>" data-fileType="<%=item.type%>" data-fileSize="<%=item.size%>" data-DownloadsCount="<%=item.downloads%>" data-FilePath="/user/<%=item.fileowner%>/download/<%=item.name%>"></div>
+                        </div>
+                        <%})%>
+                    </li>
+
+                    <% user_folders.forEach((items)=>{%>
+
+                    <li data-folderName="<%=items.folderName%>"  class="directorymain"><i class="fas fa-folder"></i> <span class="direcName" > <%=items.folderName%> <span class="pl-2 deleteFolder d-none" style="font-size: small"><i class="fa fa-trash text-danger"></i></span> </span>
+                        <!-- Contents/Files Folder -->
+                       <div style="font-size: x-small" class="d-none alert alert-success pl-2 pr-0 pt-0 pb-0 deleteProgress">
+                                        Deleting Please wait..
+                       </div>
+
+                        <%(items.files).forEach((file)=>{%>
+                        <div class="dir-Contents">
+                           <div  data-fileName="<%=file.name%>" data-fileType="<%=file.type%>" data-fileSize="<%=file.size%>" data-DownloadsCount="<%=file.downloads%>" data-FilePath="/user/<%=file.fileowner%>/download/<%=file.name%>" date-Filextension="<%=file.extension%>"></div>
+
+                        </div>
+                        <%})%>
+
+
+                    </li>
+                    <%})%>
+
+
+                </ul>
+            </div>
+            <div id="directoryOutput">
+                <div class="d-none" id="currentDir" data-pathDir="home"></div>
+                <div style="cursor: pointer" class="title_sub_sec "><i class="fas fa-home text-black-50"></i><span id="currentView" class="pl-1">Home</span></div>
+                <div id="output-section">
+                    <div id="output-section-text" class="d-none p-1"><h5 class='p-2 m-1 text-center'></h5></div>
+                    <table class=" table   table-hover text-center">
+
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    <div id="fileUploadModal" class="modal fade" >
+        <div class=" modal-dialog ">
+            <div class=" modal-content">
+                <div class=" modal-header">
+                    <h4 class="modal-title text-info text-center font-weight-bold">File Upload Form</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                </div>
+                <div class=" modal-body">
+                    <form id="uploadForm">
+                        <div id="createLocation" class="alert alert-info p-1 ">You are uploading to <span style="font-weight: bold">Home</span> Folder</div>
+                        <div class=" form-group">
+                            <label for="fileTitle" id="FieldTitleLabel" class="font-weight-bold p-0 m-0">File Title <span class="text-danger"><sup>*</sup></span></label>
+                            <input name="fileTitle" required id="fileTitle" type="text"  class="form-control " style="margin-bottom:10px" placeholder="File Title...">
+                            <label for="fileCategory" class="font-weight-bold d-none m-0 p-0">File Category <span class="text-danger"><sup>*</sup></span></label>
+                            <select required id="fileCategory" style="margin-bottom:10px"  class="form-control d-none">
+                                <option value="default">--select category--</option>
+                                <option value="Document">Document</option>
+                                <option value="Image">Image</option>
+                                <option value="Video">Video</option>
+                                <option value="archive">Archive</option>
+                            </select>
+
+
+                            <div class="custom-file">
+                                <input required name="fileUpload"  type="file" class="custom-file-input" id="customFile">
+                                <label class="custom-file-label" for="customFile">Choose file</label>
+                            </div>
+                            <input type="text" class="d-none" name="toFolder" id="toFolder" value="">
+                            <input type="text" class="d-none" name="csrf" value="<%=csrf%>">
+                            <div style="font-size: small;" id="fileState" class="d-none mt-2 text-danger"></div>
+
+                        </div>
+                        <div id="trackProgress">
+
+                        </div>
+                        <button  data-formState="okay" type="submit" class=" text-center text-white font-weight-bold btn bg-info">Submit</button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="newFolderModal" class="modal fade">
+        <div class=" modal-dialog">
+            <div class=" modal-content">
+                <div class=" modal-header">
+                    <h4 class="modal-title text-info text-center font-weight-bold">Create Folder</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class=" modal-body">
+
+                    <form id="folderCreate">
+                        <div class="form-group" >
+                            <div id="folderFormState" class="alert d-none"></div>
+                            <label for="folderName">Folder Name <span class="text-danger"><supp>*</supp></span>   </small> <span id="folderLocation" style="font-weight: bold;"></span></label>
+                                <input name="folderName" maxlength="20" minlength="1" required id="folderName" class="form-control" placeholder="Folder Name" type="text"><br>
+                                <button type="submit" class="btn btn-sm btn-info">Create</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+    <div id="csrfToken" data-csrf="<%=csrf%>" class="d-none"></div>
+</div>
+
+
+
+<script src="/javascripts/jquery.min.js"></script>
+<script src="/javascripts/popper.min.js"></script>
+<script src="/javascripts/tether.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+
+<script>
+
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        //Sentense case all Folder Names
+        document.querySelectorAll('.direcName').forEach((name)=>{
+            //update
+           name.style.textTransform= 'capitalize'
+        })
+
+        let viewing_folder = document.querySelector('#currentView')
+        let folderTracker = document.querySelector('#currentDir') //data-pathDir
+        let folders = document.querySelectorAll('.directorymain')
+        let outputTable = document.querySelector('#output-section table')
+        let outputState= document.querySelector('#output-section-text')
+
+        let table_fields ='<tr>'+
+            '<th>Type</th>'+
+            '<th>Name</th>'+
+            '<th>Size</th>'+
+            '<th>Downloads</th>'+
+            '<th>Share</th>'+
+            '<th class=" disabled">Delete</th>'+
+        '</tr>'
+       function outputState_show(msg,color){
+           outputState.classList.remove(...outputState.classList);
+           outputState.classList.add(color)
+           outputState.innerHTML =msg
+       }
+       function outputState_hide(){
+           outputState.classList.remove(...outputState.classList);
+           outputState.classList.add('d-none')
+
+       }
+        outputState_show("Fetching your Documents.Please wait <i class='fa fa-spin fa-spinner'></i>",'text-info')
+
+
+        //fecth home folder items and output
+        folders.forEach((folder)=>{
+            //check if its home
+
+            if(folder.getAttribute('data-folderName')==='home'){
+                //output home table
+                outputState_hide()
+                //fecth table columns and ouput
+                let all_files = folder.querySelectorAll('.dir-Contents div')
+                let prepared_table_data =''
+                all_files.forEach((file)=>{
+                    folderName = folder.getAttribute('data-folderName')
+
+                    let filename,filesize,filedownloads,filetype,filelink,filextension
+                    filename = file.getAttribute('data-fileName')
+
+                    filesize = (Number(file.getAttribute('data-fileSize'))/1024).toFixed(2) //(MB)
+                    if(filesize>999){
+                        filesize = (Number(file.getAttribute('data-fileSize'))/(1024*1024)).toFixed(2)
+                        filesize = filesize+ ' MB'
+
+
+                    }else{
+                        filesize = filesize + " KB"
+                    }
+                    filextension= file.getAttribute('date-Filextension')
+                    filedownloads=file.getAttribute('data-DownloadsCount')
+                    filetype = file.getAttribute('data-fileType')
+                    filelink = String(file.getAttribute('data-FilePath'))
+
+                    filename = filename +'.'+ filextension
+
+
+                    if(filetype.search(/javascript/i)>-1 || filetype.indexOf(/html/i)>-1 ){
+                        //Code related
+                        icon_to_show = '<i class="fas fa-code"></i>'
+                    }else  if(filetype.search(/image/i)>-1 || filetype.search(/ogg/i)>-1){
+                         //image
+                        icon_to_show='<i class="far fa-image"></i>'
+                    }else if(filetype.search(/video/i)>-1){
+                        //video
+                        icon_to_show='<i class="fas fa-video"></i>'
+                    }else if(filetype.search(/rar/i)>-1 || filetype.search(/octet-stream/i)>-1 ){
+                        //archive
+                        icon_to_show='<i class="far fa-file-archive"></i>'
+                    }else if(filetype.search(/pdf/i)>-1){
+                        //pdf
+                        icon_to_show='<i class="far fa-file-pdf"></i>'
+
+                    }else if(filetype.search(/msword/i)>-1 || filetype.search('doc')>-1){
+                      //doc
+                        icon_to_show='<i class="far fa-file-word"></i>'
+                    }else if(filetype.search(/vnd.openxmlformats-officedocument.wordprocessingml.document/i)>-1){
+                        //doxc
+                        icon_to_show='<i class="far fa-file-word"></i>'
+                    }else if(filetype.search(/text/i)>-1){
+                        //text
+                        icon_to_show ='<i class="far fa-file-alt"></i>'
+
+                    }else{
+                         icon_to_show ='<i class="fas fa-file"></i>'
+                    }
+
+
+
+                    prepared_table_data = prepared_table_data +
+                        '<tr>'+
+                        '<td>'+icon_to_show+'</td>'+
+                        '<td><a href="'+filelink+'">'+filename+'</a></td>'+
+                        '<td>'+filesize+ '</td>'+
+                        '<td>'+filedownloads+'</td>'+
+                        '<td title="Share"><a href="'+filelink+'"><i class="fas fa-link"></i></a></td>'+
+                        '<td style="cursor: pointer" data-fileTarget="'+folderName+'-'+filename+'"><i class="fas fa-trash text-danger"></i></td>'+
+                        '</tr>'
+                })
+
+                 table_fields ='<tr>'+
+                    '<th>Type</th>'+
+                    '<th>Name</th>'+
+                    '<th>Size</th>'+
+                    '<th>Downloads</th>'+
+                    '<th>Share</th>'+
+                    '<th class=" disabled">Delete</th>'+
+                    '</tr>'
+                outputTable.innerHTML = table_fields+prepared_table_data
+
+            }
+
+            folder.addEventListener('click',function(){
+
+              //empty output
+                folderTracker.setAttribute('data-pathDir',folder.getAttribute('data-folderName'))
+                viewing_folder.innerHTML = String(folder.getAttribute('data-folderName'))
+                viewing_folder.style.textTransform = "capitalize"
+                outputTable.innerHTML=''
+                console.log( document.querySelector('#createLocation').innerHTML)
+                document.querySelector('#createLocation').innerHTML = "You are uploading to <span style='font-weight:bold'>"+String(folder.getAttribute('data-folderName'))+"</span> Folder"
+                console.log( document.querySelector('#createLocation').innerHTML)
+                //output home table
+                outputState_hide()
+                //fecth table columns and ouput
+                let all_files = folder.querySelectorAll('.dir-Contents div')
+                let prepared_table_data =''
+                if(all_files.length===0){
+                    outputState_show("<span class='p-2 text-center'>This Folder is currently Empty</span>",'text-warning')
+                }else{
+                    all_files.forEach((file)=>{
+                        folderName = folder.getAttribute('data-folderName')
+
+                        let filename,filesize,filedownloads,filetype,filelink,filextension
+                        filename = file.getAttribute('data-fileName')
+
+                        filesize = (Number(file.getAttribute('data-fileSize'))/1024).toFixed(2) //(MB)
+                        if(filesize>999){
+                            filesize = (Number(file.getAttribute('data-fileSize'))/(1024*1024)).toFixed(2)
+                            filesize = filesize+ ' MB'
+
+
+                        }else{
+                            filesize = filesize + " KB"
+                        }
+                        filextension= file.getAttribute('date-Filextension')
+                        filedownloads=file.getAttribute('data-DownloadsCount')
+                        filetype = file.getAttribute('data-fileType')
+                        filelink = String(file.getAttribute('data-FilePath'))
+
+                        filename = filename +'.'+ filextension
+
+
+                        if(filetype.search(/javascript/i)>-1 || filetype.indexOf(/html/i)>-1 ){
+                            //Code related
+                            icon_to_show = '<i class="fas fa-code"></i>'
+                        }else  if(filetype.search(/image/i)>-1 || filetype.search(/ogg/i)>-1){
+                            //image
+                            icon_to_show='<i class="far fa-image"></i>'
+                        }else if(filetype.search(/video/i)>-1){
+                            //video
+                            icon_to_show='<i class="fas fa-video"></i>'
+                        }else if(filetype.search(/rar/i)>-1 || filetype.search(/octet-stream/i)>-1 ){
+                            //archive
+                            icon_to_show='<i class="far fa-file-archive"></i>'
+                        }else if(filetype.search(/pdf/i)>-1){
+                            //pdf
+                            icon_to_show='<i class="far fa-file-pdf"></i>'
+
+                        }else if(filetype.search(/msword/i)>-1 || filetype.search('doc')>-1){
+                            //doc
+                            icon_to_show='<i class="far fa-file-word"></i>'
+                        }else if(filetype.search(/vnd.openxmlformats-officedocument.wordprocessingml.document/i)>-1){
+                            //doxc
+                            icon_to_show='<i class="far fa-file-word"></i>'
+                        }else if(filetype.search(/text/i)>-1){
+                            //text
+                            icon_to_show ='<i class="far fa-file-alt"></i>'
+
+                        }else{
+                            icon_to_show ='<i class="fas fa-file"></i>'
+                        }
+
+
+                        prepared_table_data = prepared_table_data +
+                            '<tr>'+
+                            '<td>'+icon_to_show+'</td>'+
+                            '<td><a href="'+filelink+'">'+filename+'</a></td>'+
+                            '<td>'+filesize+ '</td>'+
+                            '<td>'+filedownloads+'</td>'+
+                            '<td title="Share"><a href="'+filelink+'"><i class="fas fa-link"></i></a></td>'+
+                            '<td style="cursor: pointer" data-fileTarget="'+folderName+'-'+filename+'"><i class="fas fa-trash text-danger"></i></td>'+
+                            '</tr>'
+                    })
+
+                    table_fields ='<tr>'+
+                        '<th>Type</th>'+
+                        '<th>Name</th>'+
+                        '<th>Size</th>'+
+                        '<th>Downloads</th>'+
+                        '<th>Share</th>'+
+                        '<th class=" disabled">Delete</th>'+
+                        '</tr>'
+                    outputTable.innerHTML = table_fields+prepared_table_data
+                }
+
+
+            })
+
+
+
+        })
+
+
+
+
+
+
+        let userFileName = document.querySelector("#fileTitle")
+
+
+        //Filter TItle INput
+        userFileName.addEventListener("input",function(){
+            let invalid_characters = ["-","/","*","#","$","!","@","$","%","(" ,")",".",",","'",'"']
+            let latsInsertedChar = this.value[(this.value).length -1 ]
+
+            if (invalid_characters.indexOf(latsInsertedChar)>-1){
+                $("#FieldTitleLabel").addClass("text-danger").html("<small>Invalid character ("+latsInsertedChar+") usage in file title !</small>")
+                this.value =this.value.slice(this.value,(this.value).length -1)
+                fileState.removeClass("d-none").html("Enter a valid File Name ")
+                $("#uploadForm button").attr("data-formState","bad")
+            }else{
+                $("#FieldTitleLabel").removeClass("text-danger").html('File Title <span class="text-danger"><sup>*</sup></span>')
+            }
+        })
+
+        // Add the following code if you want the name of the file appear on select
+        let fileState = $('#fileState')
+        // $(".custom-file-input").on("change", function() {
+        //     let allowedTypes  //['docx','jpeg','png','jpg','svg,']
+        //     let filenametoUse= ''
+        //     var fileName = $(this).val().split("\\").pop();
+        //     let file_is_valid = false
+        //
+        //     if (userFileName.value === undefined || userFileName.value.length <1){
+        //         //Invalid Username,Use default File name
+        //         filenametoUse = fileName
+        //     }else{
+        //             let extension =fileName.split('.')[fileName.split('.').length - 1]
+        //             filenametoUse= userFileName.value+'.'+extension
+        //         // try{
+        //         //     let extension =fileName.split('.')[fileName.split('.').length - 1]
+        //         //     filenametoUse= userFileName.value+'.'+extension
+        //         //
+        //         //     if (allowedTypes.indexOf(extension)==-1){
+        //         //         //File is Invalid Throw Error
+        //         //         fileState.removeClass("d-none").html("The file you selected is invalid.<br>"
+        //         //             +"Files allowed must be of docx,png,jpeg,rar,zip fomart only ")
+        //         //         $("#uploadForm button").attr("data-formState","bad")
+        //         //     }else{
+        //         //         fileState.addClass("d-none")
+        //         //     }
+        //         // }catch{
+        //         //     filenametoUse =fileName
+        //         // }
+        //
+        //     }
+        //
+        //
+        //     $(this).siblings(".custom-file-label").addClass("selected").html(filenametoUse);
+        // });
+        $(".custom-file-input").on("change", function() {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+        //Upload form submission
+        $("#uploadForm").on("submit",function(e){
+            e.preventDefault()
+            $("#uploadForm button").attr("data-formState","okay")
+            let formState = $("#uploadForm button").attr("data-formState")
+            if (formState === "bad" || formState === undefined || formState.length<2){
+                //Invalid Form
+
+                fileState.removeClass("d-none").html("The form contains errors , check your inputs and try submitting again. ")
+                $("#uploadForm button").attr("data-formState","bad")
+            }else{
+                //Process the Form
+
+                let FileSize = document.querySelector('#customFile').files[0].size
+
+
+                if (!isNaN(FileSize)){
+                    //a valid Number
+                   let mbSize  = FileSize/ (1024 * 1024 )
+
+                    if(mbSize>500){
+                        fileState.addClass("alert alert-danger").removeClass(" alert-info d-none alert-success alert-warning").html("File is greater than 500MB.Cannot Upload")
+                    }else{
+                        //Proceed to Uploading
+                        $('#toFolder').attr('value',$('#currentDir').attr('data-pathDir'))
+                        fileState.removeClass("d-none text-danger text-success alert-danger alert-warning").addClass("alert-info").html("Submitting .Please wait <span data-pcnt='0' id='percentageProgress'>0</span> ")
+                        let dataPercentage = $("#percentageProgress")
+
+                        let formdata = new FormData( document.querySelector("#uploadForm"));
+
+                       let xhr = new XMLHttpRequest();
+
+
+                        xhr.open("post", "/users/new/file");
+                       // xhr.setRequestHeader("Content-type", "multipart/form-data;boundary=----WebKitFormBoundaryyrV7KO0BoCBuDbTL");
+
+                        xhr.upload.onprogress= function (e){
+                           $("#percentageProgress").attr("data-pcnt",xhr.responseText)
+                               let calculateProgress =Math.round((Number(e.loaded)/Number(e.total))*100)
+                            let progR ='  <div style="height:30px;  class="progress"> <div class="progress-bar active bg-success" role="progressbar" aria-valuenow="'+calculateProgress+'" aria-valuemin="0" aria-valuemax="100" style="height:30px;width:'+calculateProgress+'%">'+calculateProgress+'% Complete </div></div>'
+                            fileState.removeClass("d-none alert-info text-danger  alert-danger ").addClass('alert alert-warning').html('Upload in progress.This page will relode once the upload is complete. Please Do not close this popup or reload the page. ')
+                            $('#trackProgress').html(progR)
+                       }
+                         xhr.addEventListener('loadstart',()=>{
+                        //     console.log(xhr.responseText)
+                             $("#uploadForm button").addClass('d-none')
+                            fileState.removeClass("d-none alert-warning alert-danger alert-success").addClass("alert alert-info").html("Initializing  Upload.<i class='fa fa-spin fa-spinner'></i>")
+                         })
+                         xhr.addEventListener('load',()=>{
+                             if(xhr.status===200){
+                                 fileState.removeClass("d-none alert-info alert-warning alert-danger").addClass("alert alert-success").html("Your File has been Uploaded Successfully.You will be redirected shortly")
+                                 $('#trackProgress').html('')
+                                 $("#uploadForm").each(function(){
+                                 this.reset();
+                             });
+                                 $(".custom-file-input").val('')
+
+                             setTimeout(()=>{
+                                     window.location.href =''
+                                 },1500)
+                             }else{
+                                 fileState.removeClass("d-none alert-info alert-warning alert-success").addClass("alert alert-danger").html("Failed to Upload ! "+ xhr.responseText)
+                                 $('#trackProgress').html('')
+                                 $("#uploadForm button").removeClass('d-none')
+                             }
+
+                         })
+                        xhr.addEventListener('error',()=>{
+                            $("#uploadForm button").removeClass('d-none')
+                            fileState.addClass("alert alert-danger ").removeClass("d-none alert-warning alert-success alert-info ").html("Failed to upload ! "+xhr.responseText )
+                            $('#trackProgress').html('')
+
+                        })
+
+                        xhr.send(formdata);
+
+
+                    }
+
+
+                }else{
+                    //It sis not a number
+                    fileState.addClass(" alert alert-danger").removeClass(" d-none alert-info alert-warning alert-success").html("Cannot determine the File Size.")
+                }
+
+                // setInterval(()=>{
+                //     if (Number($("#percentageProgress").attr("data-pcnt"))<100){
+                //         //update
+                //         dataPercentage.html((Number($("#percentageProgress").attr("data-pcnt")))+5+" % done")
+                //         $("#percentageProgress").attr("data-pcnt",Number($("#percentageProgress").attr("data-pcnt"))+5)
+                //         console.log(Number($("#percentageProgress").attr("data-pcnt")))
+                //
+                //     }
+                // },1500)
+
+            }
+        })
+
+
+        //folderCreation
+        let currentDir = $('#currentDir').attr('data-pathDir')
+        let folderFormState = $('#folderFormState')
+        let folderLocation = $('#folderLocation')
+        $('#folderCreate input').on('input',function(){
+            if ( /[0-9]/.test(this.value)==false && /['@,!,#,$,%,^,&,*,(,),+,=,~,`,|,\,?,",\',{,}']/.test(this.value)===false){
+                folderLocation.html(currentDir+'/'+this.value +'<span style="color:grey"><small> ( Directory path ) </small><span>')
+                folderFormState.removeClass('alert-danger').addClass('d-none').html('')
+                document.querySelector('#folderCreate').querySelectorAll('button')[0].disabled= false
+            }else{
+                folderFormState.addClass('alert-danger p-0').removeClass('alert-success d-none').html('Enter a valid Folder Name')
+                document.querySelector('#folderCreate').querySelectorAll('button')[0].disabled= true
+            }
+
+        })
+        $('#folderCreate').submit((e)=>{
+            e.preventDefault()
+
+            //verify the name doensnt have unwanted Characters
+            let FormData =  $('#folderCreate').serialize()  + '&csrf='+ $('#csrfToken').attr('data-csrf')
+
+            folderFormState.removeClass('alert-danger d-none').addClass('alert-success').html("Creating Folder.Please wait! <i class='fa fa-spin fa-spinner'></i>")
+            $.post('/users/new/folder',FormData,()=>{
+                folderFormState.removeClass('alert-danger d-none').addClass('alert-success').html('Success! Folder has been created')
+                setTimeout(()=>{
+                    window.location.reload()
+                },1500)
+            }).fail((xhr)=>{
+                folderFormState.removeClass('alert-success d-none').addClass('alert-danger').html('Failed to Create Folder! '+ xhr.responseText)
+            })
+
+        })
+
+
+
+    })
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+#storage-section{
+    width:100%;
+}
+.progress{
+    width: 60%;
+    margin-left: 20%;
+}
+#storage-section p:nth-child(1){
+    margin-bottom: 3%;
+}

@@ -1,0 +1,381 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mawingu CLoud Storage</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+
+    <link href="/stylesheets/index.css" rel="stylesheet" type="text/css">
+    <link href="/stylesheets/account.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div  class=" container-fluid p-0 m-0 ">
+    <div id="content-wrapper" class="p-0 m-0">
+        <%- include('./partials/nav'); %>
+        <div id="content-section" class=" content-wrapper-itm ">
+            <div id="account-section">
+                <p class=" text-center alert-info font-weight-bold">My Account</p>
+                <div id="myAccountToogle">
+                    <button id="personaldet" data-to-toggle="personalDetail" class="btn btn-sm btn-info m-2 text-center ">View Personal Details</button>
+                    <button id="secdet" data-to-toggle="accountSecurity" class="btn btn-sm btn-info m-2 text-center ">View Privacy and Security</button>
+                </div>
+                <div id="details-control">
+                    <div id="personalDetail" >
+                        <div class="text-center " style="text-decoration: underline;">Personal Details</div>
+                        <div class="form-group border border-info border-top-0 p-3 shadow-sm">
+                            <label for="fullName" class="p-0 m-0">Full Names</label>
+                            <input id="fullName" value="<%= user.fullname%>" style="text-transform: uppercase;" disabled type="text" class="form-control ">
+                            <button data-actiontype="Edit" id="editusername" class="btn btn-sm m-1 btn-info">Edit Name <i class="fas fa-pen"></i> </button>
+
+                            <br><br>
+                            <label for="userEmail" class="p-0 m-0">User Email</label>
+                            <input id="userEmail" value="<%= user.email%>" style="text-transform: uppercase;" type="email" disabled class="form-control">
+                            <button data-actiontype="Edit" id="edituseremail" class="btn btn-sm m-1 btn-info">Edit Email <i class="fas fa-pen"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="accountSecurity"  class=" d-none" >
+                        <div class="text-center " style="text-decoration: underline;">Privacy and Security</div>
+                        <div class="form-group border border-info border-top-0 p-3 shadow-sm">
+                            <label for="oldpassword" id="oldpasswordlabel" class="p-0 m-0">Old Password</label>
+                            <div class="input-group mb-3">
+                                <input id="oldpassword" name="oldpassword" type="password" class="form-control border-right-0">
+                                <div class=" input-group-append bg-white">
+                                    <div style="cursor:pointer" class="input-group-text bg-white passwordToggler"><i class="fa fa-eye"></i></div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <label for="newpassword" id="newpasswordlabel" class="p-0 m-0">New Password</label>
+                            <div class="input-group mb-3">
+                                <input id="newpassword" type="password" class="form-control border-right-0">
+                                <div class=" input-group-append bg-white">
+                                    <div style="cursor:pointer" class="input-group-text bg-white passwordToggler"><i class="fa fa-eye"></i></div>
+                                </div>
+                            </div>
+                            <br>
+                            <label for="confirmpassword" id="confirmpasswordlabel" class="p-0 m-0">Re-enter New Password</label>
+                            <div class="input-group mb-3">
+                                <input id="confirmpassword" type="password" class="form-control border-right-0">
+                                <div class=" input-group-append bg-white">
+                                    <div style="cursor:pointer" class="input-group-text bg-white passwordToggler"><i class="fa fa-eye"></i></div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <button id="updatepassword" data-formstate="Invalid" class="btn btn-sm m-1  btn-info">Update Password </button>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="d-none" id="csrfToken" data-csrfValue="<%=csrf%>"></div>
+
+</div>
+
+
+
+</div>
+
+
+
+<script src="/javascripts/jquery.min.js"></script>
+<script src="/javascripts/popper.min.js"></script>
+<script src="/javascripts/tether.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded',()=>{
+
+        //toggle passwordField
+        let allPasswordTogglers = document.querySelectorAll('.passwordToggler')
+        allPasswordTogglers.forEach((toggler)=>{
+            toggler.addEventListener('click',function(){
+
+               let InputField =this.parentNode.parentNode.children[0]
+
+               if (InputField.getAttribute('type')==='password'){
+                   //Show as text
+                   InputField.setAttribute('type','text')
+                   toggler.innerHTML= '<i class="fa fa-eye-slash"></i>'
+               }else if(InputField.getAttribute('type')==='text'){
+                   InputField.setAttribute('type','password')
+                   toggler.innerHTML= '<i class="fa fa-eye"></i>'
+               }
+
+            })
+        })
+        //Toogle form views
+        let viewDetails = $('#personaldet')
+        let viewSEcurity =$('#secdet')
+        let pDetailsSEction = $('#personalDetail')
+        let sDetailsSEction =$('#accountSecurity')
+
+        viewDetails.on('click',function(){
+            //data-to-toggle
+
+            pDetailsSEction.toggleClass('d-none')
+            if (pDetailsSEction.attr('class').search('d-none')<0){ //Is shown
+                sDetailsSEction.removeClass('d-none')
+                sDetailsSEction.addClass('d-none')
+                viewSEcurity.removeClass('shadow-lg font-weight-bold').html("View Privacy and Security")
+                viewDetails.addClass('shadow-lg font-weight-bold').html('Viewing Personal Details')
+
+            } else{
+                viewDetails.removeClass('shadow-lg font-weight-bold').html('View Personal Details')
+
+            }
+        })
+        viewSEcurity.on('click',function(){
+            sDetailsSEction.toggleClass('d-none')
+            if (sDetailsSEction.attr('class').search('d-none')<0){ //Is shown
+
+                pDetailsSEction.removeClass('d-none')
+                pDetailsSEction.addClass('d-none')
+                viewSEcurity.addClass('shadow-lg font-weight-bold').html("Viewing Privacy and Security")
+                viewDetails.removeClass('shadow-lg font-weight-bold').html('View Personal Details')
+
+            } else{
+                viewSEcurity.removeClass('shadow-lg font-weight-bold').html("View Privacy and Security")
+
+            }
+        })
+
+        //personal details edit
+        let userName = $('#fullName')
+        let userEmail = $('#userEmail')
+        const defaultName = userName.val()
+        const defaultEmail = userEmail.val()
+
+        let edituserName = $('#editusername')
+        let edituserEmail = $('#edituseremail')
+        const nameButtonHtml = edituserName.html()
+        const emailButtonHtml = edituserEmail.html()
+
+        edituserName.on('click',function(){
+            if (edituserName.attr('data-actiontype')==='Edit'){ //disable input to allow editing
+                userName.attr('disabled',false)
+                edituserName.html('Update <i class="fas fa-check"></i>')
+                edituserName.attr('data-actiontype','Save')
+            }else{ //Save data
+                userName.attr('disabled',true)
+                //edituserName.attr('data-actiontype','Edit')
+
+                edituserName.removeClass('btn-info').addClass('btn-success').html('Updating <i class="fas fa-circle-notch fa-spin"></i>')
+
+                let checkAlphabet = /^[A-Za-z]/
+
+                //simple user name validation
+                if(userName.val().length <3  || userName.val()==undefined || checkAlphabet.test(userName.val())==false){
+                    //validation Fails
+                    userName.attr('disabled',false)
+                    edituserName.removeClass('btn-success').addClass('btn-danger').html("<small>Use name cannot be less than 3 characters</small>")
+                    setTimeout(()=>{
+                        edituserName.addClass('btn-success').removeClass('btn-danger').html('Update <i class="fas fa-check"></i>')
+                    },5000)
+                }else{
+                    //validation passed
+                    //send to server now
+                    let csrf = $('#csrfToken').attr('data-csrfValue')
+                    $.post('/users/updateName','newname='+userName.val()+'&csrf='+csrf,(data,status,xhr)=>{
+                        //recieved a success from server
+                        edituserName.addClass('btn-success').removeClass('btn-danger').html('Updated Name succesfully')
+                        const newname =userName.val()
+                        setTimeout(()=>{
+                            edituserName.addClass('btn-info').removeClass('btn-danger').html(nameButtonHtml)
+                            edituserName.attr('data-actiontype','Edit')
+                            userName.attr('disabled',true)
+                            userName.val(newname)
+                            window.location.reload()
+
+                        },3000)
+
+
+                    },'text').fail((xhr)=>{
+                        //recieved a fail from server
+                        edituserName.removeClass('btn-success').addClass('btn-danger').html("<small>Failed to Update user Name. "+xhr.responseText +"</small>")
+                        setTimeout(()=>{
+                            edituserName.addClass('btn-info').removeClass('btn-danger').html(nameButtonHtml)
+                            edituserName.attr('data-actiontype','Edit')
+                            userName.attr('disabled',true)
+                            userName.val(defaultName)
+
+                        },3000)
+
+                    })
+
+                }
+            }
+
+        })
+
+        //edit email
+        edituserEmail.on('click',function(){
+            if (edituserEmail.attr('data-actiontype')==='Edit'){ //disable input to allow editing
+                userEmail.attr('disabled',false)
+                edituserEmail.html('Update <i class="fas fa-check"></i>')
+                edituserEmail.attr('data-actiontype','Save')
+            }else{ //Save data
+                userEmail.attr('disabled',true)
+                //edituserName.attr('data-actiontype','Edit')
+
+                edituserEmail.removeClass('btn-info').addClass('btn-success').html('Updating <i class="fas fa-circle-notch fa-spin"></i>')
+
+                let checkAlphabet = /^[A-Za-z]/
+
+                //simple user name validation
+                if(userEmail.val().length <3  || userEmail.val()==undefined || checkAlphabet.test(userEmail.val())==false){
+                    //validation Fails
+                    userEmail.attr('disabled',false)
+                    edituserEmail.removeClass('btn-success').addClass('btn-danger').html("<small>Use Email cannot be less than 3 characters</small>")
+                    setTimeout(()=>{
+                        edituserEmail.addClass('btn-success').removeClass('btn-danger').html('Update <i class="fas fa-check"></i>')
+                    },5000)
+                }else{
+                    let csrf = $('#csrfToken').attr('data-csrfValue')
+                    //validation passed
+                    //send to server now
+                    $.post('/users/updateEmail','newemail='+userEmail.val()+'&csrf='+csrf,(data,status,xhr)=>{
+                        //recieved a success from server
+                        edituserEmail.addClass('btn-success').removeClass('btn-danger').html('Updated Email succesfully')
+                        const newemail =userEmail.val()
+                        setTimeout(()=>{
+                            edituserEmail.addClass('btn-info').removeClass('btn-danger').html(emailButtonHtml)
+                            edituserEmail.attr('data-actiontype','Edit')
+                            userEmail.attr('disabled',true)
+                            userEmail.val(newemail)
+                            window.location.reload()
+                        },3000)
+
+
+                    },'text').fail((xhr)=>{
+                        //recieved a fail from server
+                        edituserEmail.removeClass('btn-success').addClass('btn-danger').html("<small>Failed to Update user Email."+xhr.responseText+"</small>")
+                        setTimeout(()=>{
+                            edituserEmail.addClass('btn-info').removeClass('btn-danger').html(emailButtonHtml)
+                            edituserEmail.attr('data-actiontype','Edit')
+                            userEmail.attr('disabled',true)
+                            userEmail.val(defaultEmail)
+
+                        },4500)
+
+                    })
+
+                }
+            }
+
+        })
+
+
+        //password form
+        let oldpassword = $('#oldpassword')
+        let newpassword = $('#newpassword')
+        let confirmpassword = $('#confirmpassword')
+        let updatepassword= $('#updatepassword')
+
+        const defaultoldpassword = $('#oldpasswordlabel').html()
+        const defaultnewpassword = $('#newpasswordlabel').html()
+        const defaultconfirmpassword =$('#confirmpasswordlabel').html()
+
+        updatepassword.on('click',()=>{
+            //Check old password
+            let oldpasswordvalue = oldpassword.val()
+            let newpasswordvalue = newpassword.val()
+            let confirmnewpassword = confirmpassword.val()
+
+            let checkAlphabet = /[A-Za-z]/gi
+            let checkNumber = /[0-9]/gi
+            let oldpasswordState= false
+            let newpasswordstate=false
+
+            //check old password
+            if (checkAlphabet.test(oldpasswordvalue)==true && oldpasswordvalue.length>6 && checkNumber.test(oldpasswordvalue)==true){
+                $('#oldpasswordlabel').removeClass('text-danger').html(defaultoldpassword)
+                oldpasswordState=true
+
+            }else{
+                $('#oldpasswordlabel').addClass('text-danger').html('<small> Password must contain atleast 6 characters and have letters and numbers.</small>')
+                oldpasswordState=false
+            }
+
+            //check new password
+            if (checkAlphabet.test(newpasswordvalue)==true && newpasswordvalue.length>6 && checkNumber.test(newpasswordvalue)==true && newpasswordvalue!== oldpasswordvalue){
+                $('#newpasswordlabel').removeClass('text-danger').html(defaultnewpassword)
+                newpasswordstate=true
+
+            }else{
+                $('#newpasswordlabel').addClass('text-danger').html('<small> Password must contain atleast 6 characters and have letters and numbers and NOT be simmilar to old password</small>')
+                newpasswordstate=false
+            }
+
+            //check confirmation password
+            if (confirmnewpassword===newpasswordvalue  && newpasswordvalue!==oldpasswordvalue && oldpasswordvalue.length>6 ){
+                $('#confirmpasswordlabel').removeClass('text-danger').html(defaultconfirmpassword)
+                updatepassword.attr('data-formstate','Valid')
+            }else{
+                $('#confirmpasswordlabel').addClass('text-danger').html('<small>Confirmation password must match desired password.</small>')
+                updatepassword.attr('data-formstate','Invalid')
+            }
+
+            if (updatepassword.attr('data-formstate')=='Valid' && oldpasswordState===true && newpasswordstate===true){
+                //form data is okay
+                let to_send_data = 'oldpassword='+oldpassword.val()+'&newpassword='+ newpassword.val()+'&csrf='+$('#csrfToken').attr('data-csrfValue')
+                updatepassword.removeClass('btn-info').addClass('btn-success').html('<small> Updating Password.Please wait <i class="fas fa-circle-notch fa-spin"></i></small>')
+
+                $.post('/users/updatePassword',to_send_data,()=>{
+                    oldpassword.val('')
+                    newpassword.val('')
+                    confirmpassword.val('')
+                    $('#oldpasswordlabel').removeClass('text-danger').html(defaultoldpassword)
+                    $('#newpasswordlabel').removeClass('text-danger').html(defaultnewpassword)
+                    $('#confirmpassword').removeClass('text-danger').html(defaultconfirmpassword)
+                    updatepassword.attr('data-formstate','Invalid')
+                    updatepassword.removeClass('btn-info').addClass('btn-success').html('<small>Success.Your Password has Updated Successfully!</small>')
+                    setTimeout(()=>{
+                        updatepassword.removeClass('btn-success').addClass('btn-info').html('<small>Update Password</small>')
+
+                    },3000)
+                }).fail((xhr)=>{
+                    oldpassword.val('')
+                    newpassword.val('')
+                    confirmpassword.val('')
+                    $('#oldpasswordlabel').removeClass('text-danger').html(defaultoldpassword)
+                    $('#newpasswordlabel').removeClass('text-danger').html(defaultnewpassword)
+                    $('#confirmpassword').removeClass('text-danger').html(defaultconfirmpassword)
+                    updatepassword.attr('data-formstate','Invalid')
+                    updatepassword.removeClass('btn-success').addClass('btn-danger').html('<small>Failed to Update Password.'+xhr.responseText+'</small>')
+                    setTimeout(()=>{
+                        updatepassword.removeClass('btn-danger').addClass('btn-info').html('<small>Update Password</small>')
+                    },4500)
+
+                })
+
+            }
+
+
+
+        })
+
+
+
+
+
+    })
+
+</script>
+
+
+</body>
+</html>

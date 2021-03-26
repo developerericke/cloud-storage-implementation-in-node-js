@@ -1,0 +1,23 @@
+#recentFiles{
+    width: 100%;
+    border:1px solid red;
+}
+#recent-files{
+    width: 100%;
+    padding-left: 1%;
+}
+.recent{
+    cursor: pointer;
+    margin-bottom: 5px;
+    color: grey;
+}
+.recent:hover{
+  color: black;
+}
+.action-taken{
+ margin-left:   1%;
+}
+.date-accessed{
+    color: teal;
+    margin-left: 1%;
+}
