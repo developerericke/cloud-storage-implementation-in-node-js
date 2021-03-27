@@ -9,6 +9,7 @@ var objectId = require('mongodb').ObjectID
 let Token = require('csrf')
 const  fse = require('fs-extra')
 const formidable = require('formidable');
+const { File } = require("fileger")
 
 //passport
 passport.use(new LocalStrategy(
@@ -111,12 +112,38 @@ let isAuthenticated = function (req,res,next){
 /* GET users listing. */
 
 let checkQuotaLimit= function (req,res,next){
- let userQuota = req.user.quota
+ let userQuota = req.user.quotaPlan
 
-  let maxSize =  1024 * 1024 * 1024 * userQuota
+  let maxSize =  Number(1024 * 1024 * 1024 * userQuota)
   let db = req.app.locals.db
-  let table = db.collection('mawingu_users')
+  let table = db.collection('mawingu_folders')
+  let folderuser = String(req.user._id) + String(req.user.email).split('@')[0]
+ table.find({user:folderuser}).toArray((error,documents)=>{
+   if(error){
+     res.status(500).send("Internal Server Error")
+   }else{
+     if(documents.length===0){
+      next()
+     }else{
+       //we have some existinng Files
+        let occupiedSize =0
+       documents.forEach((folder)=>{
+         let folderFiles = folder.files
+          folderFiles.forEach((file)=>{
+            occupiedSize= occupiedSize+file.size
+          })
+       })
 
+       if(maxSize < occupiedSize){
+
+         res.status(403).send("You have used up your allocated quota of 5 GB")
+       }else{
+          next()
+       }
+
+     }
+   }
+ })
 
 
 }
@@ -180,7 +207,8 @@ router.post('/updateName',isAuthenticated,verifyCSRF,(req,res,next)=>{
     } else {
       table.updateOne({email: req.user.email}, {$set: {fullname: newName}}, (error, response) => {
         if (error) {
-          console.log(error)
+
+
           res.status(500).send("Internal Server Error")
         } else {
           if (response.result.nModified === 1) {
@@ -197,7 +225,9 @@ router.post('/updateName',isAuthenticated,verifyCSRF,(req,res,next)=>{
 })
 router.post('/updateEmail',isAuthenticated,verifyCSRF,(req,res,next)=>{
   let newemail = req.body.newemail
- console.log(newemail)
+
+
+
 
   if (newemail!==undefined  && newemail.length>3 && /[@]/g.test(newemail)===true && newemail.indexOf('@')>0 && newemail.charAt(newemail.length-1)!== '@' && newemail.charAt(newemail.length-1)!=='.' ) {
     let db = req.app.locals.db
@@ -209,14 +239,14 @@ router.post('/updateEmail',isAuthenticated,verifyCSRF,(req,res,next)=>{
       table.find({email:newemail}).toArray((error,result)=>
       {
         if (error) {
-          console.log(error)
+
           res.status(500).send("Internal Server Error")
         } else {
 
           if (result.length === 0) {
             table.updateOne({email: req.user.email}, {$set: {email: newemail}}, (error, response) => {
               if (error) {
-                console.log(error)
+
                 res.status(500).send("Internal Server Error")
               } else {
                 if (response.result.nModified === 1) {
@@ -259,12 +289,12 @@ router.post('/updatePassword',isAuthenticated,verifyCSRF,(req,res,next)=>{
           //Passsword meets the Policy
           bcrypt.hash(newpassword,saltRounds,(error,hash)=>{
             if(error){
-              console.log(error)
+
               res.status(500).send("Internal Server Error")
             }else{
               table.updateOne({email:req.user.email}, {$set: {password:hash}}, (error, response) => {
                 if (error) {
-                  console.log(error)
+
                   res.status(500).send("Internal Server Error")
                 } else {
                   if (response.result.nModified === 1) {
@@ -316,6 +346,7 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
     let save_path =folderUser+ '\\'+folderName
 
     fse.ensureDir(BaseFiles+'\\'+save_path).then(()=>{
+      const file = new File(BaseFiles+'\\'+save_path);
              functiontoUpdatetoDb()
     }).catch((error,status)=>{
       if(error.code==='EINVAL'){
@@ -329,16 +360,16 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
     let functiontoUpdatetoDb = function (){
       table.find({user:folderUser,folderName:folderName,folderPath:save_path}).toArray((error,documents)=>{
         if(error){
-          console.log(error)
+
           res.status(500).send("Internal Server Error")
         }else{
-          console.log(documents)
+
           if(documents.length===0){
             //Add new
             let folderToDo ={user:folderUser,folderName:folderName,folderPath:save_path,files:[]}
             table.insertOne(folderToDo,(error,response)=>{
               if(error){
-                console.log(error)
+
                 res.status(500).send("Internal Server Error")
               }else{
                 if(response.insertedCount===1){
@@ -368,8 +399,9 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
 
 })
 
-router.post('/new/file',isAuthenticated,(req,res,next)=>{
+router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
  //create home folder if it does not exist and add to db
+
   try {
 
 
@@ -386,13 +418,13 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
         res.status(500).send(errorMsg)
 
       }).catch((err) => {
-        console.log(err)
+        res.status(500).send("Internal Server Error")
       })
     }
 
     table.find({user: folderuser, folderName: 'home'}).toArray((error, result) => {
       if (error) {
-        console.log(error)
+
         res.status(500).send("Internal Server Error")
       } else {
         if (result.length === 0) {
@@ -401,7 +433,8 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
             let folderToDo = {user: folderuser, folderName: 'home', folderPath: save_home_path, files: []}
             table.insertOne(folderToDo, (error, response) => {
               if (error) {
-                console.log(error)
+
+
                 res.status(500).send("Internal Server Error")
               } else {
                 upload_and_save_file()
@@ -410,7 +443,8 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
             })
 
           }).catch((error) => {
-            console.log(error)
+
+
             res.status(500).send("Internal Server Error")
           })
 
@@ -469,7 +503,8 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
                                 //we moved the file ,so append to User Folder
                                 table.find({user: folderuser, folderName: toFolder}).toArray((error, result) => {
                                   if (error) {
-                                    console.log(error)
+
+
                                     empty_Temp_on_Errors(temp_upload_folder, "Internal Server Error")
                                   } else {
                                     //we check if the folder exists,we can only have a single folder
@@ -480,7 +515,8 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
 
 
                                           if (String(flItem.name) == String(fileName)) {
-                                            console.log("Replaced an existing")
+
+
                                             available_folder_files.splice(index, 1)
 
                                           }
@@ -505,14 +541,16 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
                                         folderName: toFolder
                                       }, {$set: {files: new_folder_files}}, (error, response) => {
                                         if (error) {
-                                          console.log(error)
+
+
                                           empty_Temp_on_Errors(temp_upload_folder, "Internal Server Error")
                                         } else {
                                           //chech updated count
                                           if (response.result.nModified === 1) {
                                             res.status(200).send("Success")
                                           } else {
-                                            console.log("Failed to Update")
+
+
                                             empty_Temp_on_Errors(temp_upload_folder, "Nothing was updated")
                                           }
                                         }
@@ -526,19 +564,21 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
                                 })
                               }).catch((error) => {
                                 //failed to move
-                                console.log(error)
+
+
                                 res.status(500).send("Failed to move")
                               })
                             })
                             .catch(err => {
-                              console.error(err)
+                              res.status(500).send("Failed to move")
                             })
                       } else {
                         fse.move(filesrc, fileDestination).then(() => {
                           //we moved the file ,so append to User Folder
                           table.find({user: folderuser, folderName: toFolder}).toArray((error, result) => {
                             if (error) {
-                              console.log(error)
+
+
                               empty_Temp_on_Errors(temp_upload_folder, "Internal Server Error")
                             } else {
                               //we check if the folder exists,we can only have a single folder
@@ -549,7 +589,8 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
 
 
                                     if (String(flItem.name) == String(fileName)) {
-                                      console.log("Replaced an existing")
+
+
                                       available_folder_files.splice(index, 1)
 
                                     }
@@ -574,14 +615,16 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
                                   folderName: toFolder
                                 }, {$set: {files: new_folder_files}}, (error, response) => {
                                   if (error) {
-                                    console.log(error)
+
+
                                     empty_Temp_on_Errors(temp_upload_folder, "Internal Server Error")
                                   } else {
                                     //chech updated count
                                     if (response.result.nModified === 1) {
                                       res.status(200).send("Success")
                                     } else {
-                                      console.log("Failed to Update")
+
+
                                       empty_Temp_on_Errors(temp_upload_folder, "Nothing was updated")
                                     }
                                   }
@@ -595,14 +638,16 @@ router.post('/new/file',isAuthenticated,(req,res,next)=>{
                           })
                         }).catch((error) => {
                           //failed to move
-                          console.log(error)
+
+
                           res.status(500).send("Failed to move")
                         })
                       }
                     })
 
               }).catch((e) => {
-                console.log(e)
+
+
                 empty_Temp_on_Errors(temp_upload_folder, 'failed')
               })
               //}

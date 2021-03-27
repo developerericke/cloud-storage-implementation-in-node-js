@@ -19,6 +19,7 @@
     "express": "~4.16.1",
     "express-session": "^1.17.1",
     "fetch-readablestream": "^0.2.0",
+    "fileger": "^1.1.0",
     "flash": "^1.1.0",
     "formidable": "^1.2.2",
     "fs-extra": "^9.1.0",

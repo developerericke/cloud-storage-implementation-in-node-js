@@ -411,39 +411,7 @@
 
         // Add the following code if you want the name of the file appear on select
         let fileState = $('#fileState')
-        // $(".custom-file-input").on("change", function() {
-        //     let allowedTypes  //['docx','jpeg','png','jpg','svg,']
-        //     let filenametoUse= ''
-        //     var fileName = $(this).val().split("\\").pop();
-        //     let file_is_valid = false
-        //
-        //     if (userFileName.value === undefined || userFileName.value.length <1){
-        //         //Invalid Username,Use default File name
-        //         filenametoUse = fileName
-        //     }else{
-        //             let extension =fileName.split('.')[fileName.split('.').length - 1]
-        //             filenametoUse= userFileName.value+'.'+extension
-        //         // try{
-        //         //     let extension =fileName.split('.')[fileName.split('.').length - 1]
-        //         //     filenametoUse= userFileName.value+'.'+extension
-        //         //
-        //         //     if (allowedTypes.indexOf(extension)==-1){
-        //         //         //File is Invalid Throw Error
-        //         //         fileState.removeClass("d-none").html("The file you selected is invalid.<br>"
-        //         //             +"Files allowed must be of docx,png,jpeg,rar,zip fomart only ")
-        //         //         $("#uploadForm button").attr("data-formState","bad")
-        //         //     }else{
-        //         //         fileState.addClass("d-none")
-        //         //     }
-        //         // }catch{
-        //         //     filenametoUse =fileName
-        //         // }
-        //
-        //     }
-        //
-        //
-        //     $(this).siblings(".custom-file-label").addClass("selected").html(filenametoUse);
-        // });
+
         $(".custom-file-input").on("change", function() {
             var fileName = $(this).val().split("\\").pop();
             $(this).siblings(".custom-file-label").addClass("selected").html(fileName);

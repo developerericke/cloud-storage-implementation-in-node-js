@@ -1,0 +1,68 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawingu CLoud Storage</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+
+    <link href="/stylesheets/index.css" rel="stylesheet" type="text/css">
+    <link href="/stylesheets/storage.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div  class=" container-fluid p-0 m-0 ">
+    <div id="content-wrapper" class="p-0 m-0">
+        <%- include('./partials/nav');%>
+        <div id="content-section" class=" content-wrapper-itm ">
+
+            <div id="storage-section">
+                <div><h4 class="pt-2 text-dark font-weight-bold text-center alert-info">Storage Usage</h4></div>
+
+
+                <p style="text-decoration: underline;" class="text-center font-weight-light">You usage so far is a below</p>
+                <div class="progress" style="height: 40px;">
+                    <div class="progress-bar progress-bar-animated <%if (percentageUsage>80){%>bg-danger<%}else if(percentageUsage>50 && percentageUsage <81){%>bg-warning<%}else{%> bg-info <%}%>" role="progressbar" style="width:<%=percentageUsage%>%;" aria-valuenow="<%=percentageUsage%>" aria-valuemin="0" aria-valuemax="100"><%=usedStorage%> GB of 5 GB used</div>
+                </div>
+
+                <div id="usageLog" class="mt-5 ml-3">
+                    <p class="p-0 m-0 font-weight-bold">How has your storage been utilized ?</p>
+                    <ul>
+                        <li><i class="fas fa-image"></i>  <small>Images</small> - <span class="font-weight-bold bg-warning" ><mark><%=usage.image%> GB</mark></span></li>
+                        <li><i class="fas fa-video"></i> <small>Videos </small> - <span class="font-weight-bold bg-warning" ><mark><%= usage.video %> GB</mark></span> </li>
+                        <li> <i class="fas fa-file"></i> <small>Documents</small>- <span class="font-weight-bold bg-warning" ><mark><%=usage.docs%> GB</mark></span></li>
+                        <li><i class="fas fa-file-archive"></i> <small>Archives (Compressed)</small> - <span class="font-weight-bold bg-warning" ><mark><%=usage.zip%> GB</mark></span> </li>
+                        <li><i class="fas fa-box"></i> <small>Others</small> - <span class="font-weight-bold bg-warning" ><mark><%=usage.others%> GB</mark></span> </li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+<script src="/javascript/jquery.min.js"></script>
+<script src="/javascript/popper.min.js"></script>
+<script src="/javascript/tether.min.js"></script>
+<script src="/javascript/bootstrap.min.js"></script>
+<script>
+
+    document.addEventListener('DOMContentLoaded',()=>{
+
+    })
+
+</script>
+
+
+</body>
+</html>

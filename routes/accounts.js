@@ -84,6 +84,90 @@ router.get('/filesmanager',isAuthenticated,generateCsrf,(req,res)=>{
 
 })
 
+router.get('/storagemap',isAuthenticated,(req,res,next)=>{
+     let userQuota = req.user.quotaPlan
+     //Prepare Usage specifics
+     let imageUsage = 0.00
+     let videoUsage = 0.00
+     let documentUsage =0.00
+     let othersUsage =0.00
+     let zipUsage = 0.00
+     let maxSize =  Number(1024 * 1024 * 1024 * userQuota)
+     let db = req.app.locals.db
+     let table = db.collection('mawingu_folders')
+     let folderuser = String(req.user._id) + String(req.user.email).split('@')[0]
+     let occupied = []
+     let usedStorage = 0
+     table.find({user:folderuser}).toArray((error,documents)=>{
+          if(error){
+               res.status(500).send("Internal Server Error")
+          }else {
+
+               documents.forEach((folder) => {
+                    let folderFiles = folder.files
+                    folderFiles.forEach((file) => {
+                         usedStorage= usedStorage+Number(file.size)
+
+                        let filetype = String(file.type)
+                         //file size in GB
+                         let fileInGB = Number(file.size)  / (1024 * 1024 * 1024)
+
+                         //check Image
+                        if(filetype.search(/image/i)>-1 || filetype.search(/ogg/i)>-1) {
+                             imageUsage= imageUsage+ fileInGB
+                        }else if(filetype.search(/video/i)>-1){
+                             videoUsage = videoUsage + fileInGB
+                        }else if(filetype.search(/rar/i)>-1 || filetype.search(/octet-stream/i)>-1 ){
+                             zipUsage = zipUsage + fileInGB
+                        }else if(filetype.search(/msword/i)>-1 || filetype.search('doc')>-1 || filetype.search(/vnd.openxmlformats-officedocument.wordprocessingml.document/i)>-1){
+                             documentUsage = documentUsage+fileInGB
+                        }else{
+                             othersUsage = othersUsage + fileInGB
+
+
+                        }
+
+                    })
+               })
+
+               //calculate used storage
+               let percUsed = 0
+               if(usedStorage>0){
+                    //
+                    usedStorage = (usedStorage /(1024 * 1024 * 1024))
+                    percUsed = (usedStorage/5)*100
+                    if(percUsed>100){
+                         percUsed = 100
+                    }
+                    if(usedStorage>5){
+                         usedStorage = 5
+                    }
+               }
+              othersUsage= othersUsage.toFixed(2)
+              imageUsage = imageUsage.toFixed(2)
+              videoUsage = videoUsage.toFixed(2)
+              zipUsage = zipUsage.toFixed(2)
+              documentUsage = documentUsage.toFixed(2)
+
+               let total_usage_check = Number(othersUsage) + Number(imageUsage) + Number(documentUsage) + Number(videoUsage) + Number(zipUsage)
+               let extra_storage  =0
+
+               if(total_usage_check>5){
+                    extra_storage = (total_usage_check-5)
+                    extra_storage = extra_storage.toFixed(2)
+                    othersUsage = Number(othersUsage) - Number(extra_storage)
+               }
+
+              let prepared_sizeCalculations = {video:videoUsage,image:imageUsage,others:othersUsage,zip:zipUsage,docs:documentUsage}
+
+               res.render('storagemap',{user:req.user,loggedIn: req.isAuthenticated(),csrf:req.csrf ,systemStatus:200,storedItems:occupied,usedStorage:usedStorage,percentageUsage:percUsed,usage:prepared_sizeCalculations})
+
+
+
+          }
+     })
+
+})
 
 
 

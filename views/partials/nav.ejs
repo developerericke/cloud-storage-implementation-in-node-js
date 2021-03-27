@@ -14,11 +14,11 @@
             <%}%>
 
     </div>
-    <div class="navigation-item"><a href="" ><i class="fas fa-user-cog"></i>  My Account</a> </div>
-    <div class="navigation-item font-weight-bold"  style="text-decoration: underline;"><a href="" ><i class="fas fa-folder"></i> My Files</a></div>
+    <div class="navigation-item"><a href="dashboard" ><i class="fas fa-user-cog"></i>  My Account</a> </div>
+    <div class="navigation-item font-weight-bold" ><a href="filesmanager" ><i class="fas fa-folder"></i> My Files</a></div>
     <div class="navigation-item"><a href="" ><i class="far fa-trash-alt"></i> Trash</a></div>
     <div class="navigation-item"><a href="" ><i class="fas fa-history"></i> Recent Files</a></div>
-<div class="navigation-item"><a href="" ><i class="far fa-hdd"></i> Storage</a></div>
+<div class="navigation-item"><a href="storagemap" ><i class="far fa-hdd"></i> Storage</a></div>
 <div title=" <% if (systemStatus === 200) {%> System is Okay<%}else{%> System is experiencing Errors <%}%>" class="navigation-item"><a href="" ><i class="fas fa-circle <% if (systemStatus === 200) {%> text-success<%}else{%> text-danger <%}%>"></i> System Status </a></div>
 <% if (loggedIn){%>
     <div class="navigation-item"><a href="/accounts/logout" ><i class="fas fa-sign-out-alt"></i> Logout</a></div>
