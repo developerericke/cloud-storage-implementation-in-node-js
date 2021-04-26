@@ -53,7 +53,7 @@ router.get('/filesmanager',isAuthenticated,generateCsrf,(req,res)=>{
      let table = db.collection('mawingu_folders')
      let users_folders =[]
 
-     let home_folder_items=[{name:'Get Started',downloads:0,size:16*1024,dateCreated:new Date().toLocaleDateString()+'  '+new Date().toLocaleTimeString(),fileowner:folderuser,type:'doc',extension:'doc'}]
+     let home_folder_items=[{name:'Get Started with Mawingu',downloads:0,size:243*1024,dateCreated:new Date().toLocaleDateString()+'  '+new Date().toLocaleTimeString(),fileowner:folderuser,type:'pdf',extension:'pdf'}]
 
      table.find({user:folderuser,folderName:'home'}).toArray((error,documents)=>{
           if(error){
@@ -87,11 +87,11 @@ router.get('/filesmanager',isAuthenticated,generateCsrf,(req,res)=>{
 router.get('/storagemap',isAuthenticated,(req,res,next)=>{
      let userQuota = req.user.quotaPlan
      //Prepare Usage specifics
-     let imageUsage = 0.00
-     let videoUsage = 0.00
-     let documentUsage =0.00
-     let othersUsage =0.00
-     let zipUsage = 0.00
+     let imageUsage = 0.0000
+     let videoUsage = 0.0000
+     let documentUsage =0.0000
+     let othersUsage =0.0000
+     let zipUsage = 0.0000
      let maxSize =  Number(1024 * 1024 * 1024 * userQuota)
      let db = req.app.locals.db
      let table = db.collection('mawingu_folders')
@@ -143,23 +143,24 @@ router.get('/storagemap',isAuthenticated,(req,res,next)=>{
                          usedStorage = 5
                     }
                }
-              othersUsage= othersUsage.toFixed(2)
-              imageUsage = imageUsage.toFixed(2)
-              videoUsage = videoUsage.toFixed(2)
-              zipUsage = zipUsage.toFixed(2)
-              documentUsage = documentUsage.toFixed(2)
+
+              othersUsage= othersUsage.toFixed(4)
+              imageUsage = imageUsage.toFixed(4)
+              videoUsage = videoUsage.toFixed(4)
+              zipUsage = zipUsage.toFixed(4)
+              documentUsage = documentUsage.toFixed(4)
 
                let total_usage_check = Number(othersUsage) + Number(imageUsage) + Number(documentUsage) + Number(videoUsage) + Number(zipUsage)
                let extra_storage  =0
 
                if(total_usage_check>5){
                     extra_storage = (total_usage_check-5)
-                    extra_storage = extra_storage.toFixed(2)
+                    extra_storage = extra_storage.toFixed(4)
                     othersUsage = Number(othersUsage) - Number(extra_storage)
                }
-
+              percUsed = Number(percUsed.toFixed(2))
               let prepared_sizeCalculations = {video:videoUsage,image:imageUsage,others:othersUsage,zip:zipUsage,docs:documentUsage}
-
+              usedStorage = Number(usedStorage).toFixed(2)
                res.render('storagemap',{user:req.user,loggedIn: req.isAuthenticated(),csrf:req.csrf ,systemStatus:200,storedItems:occupied,usedStorage:usedStorage,percentageUsage:percUsed,usage:prepared_sizeCalculations})
 
 
@@ -169,6 +170,40 @@ router.get('/storagemap',isAuthenticated,(req,res,next)=>{
 
 })
 
+router.get('/recent',isAuthenticated,(req,res)=>{
+    //fetch all rcents belonging to this user
+    let folderuser = String(req.user._id) + String(req.user.email).split('@')[0]
+    let db = req.app.locals.db
+    let table = db.collection('mawingu_recent')
+    table.find({user:folderuser}).toArray((error,response)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error")
+        }else{
+            res.render('recent',{user:req.user,loggedIn: req.isAuthenticated(),csrf:req.csrf ,systemStatus:200,recentAccessed:response})
+        }
+    })
+    //user:folderUser,folder:null,file:file,action:"Delete",date
 
+
+})
+
+router.get('/trash',isAuthenticated,generateCsrf,(req,res)=>{
+    //fetch all rcents belonging to this user
+    let folderuser = String(req.user._id) + String(req.user.email).split('@')[0]
+    let db = req.app.locals.db
+    let table = db.collection('mawingu_trash')
+    table.find({user:folderuser}).toArray((error,response)=>{
+        if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error")
+        }else{
+            res.render('trash',{user:req.user,loggedIn: req.isAuthenticated(),csrf:req.csrf ,systemStatus:200,deletedItems:response})
+        }
+    })
+    //user:folderUser,folder:null,file:file,action:"Delete",date
+
+
+})
 
 module.exports = router;

@@ -18,12 +18,13 @@
             <div id="section-actionbar">
 
                 <img class="section-actionbar-itm" src="/images/logo.png" alt="logo">
-                <div style="cursor: pointer;"  data-target="#fileUploadModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-cloud-upload-alt"></i> Upload</div>
-                <div class="section-actionbar-itm"><i class="fas fa-sort"></i> Sort</div>
-                <div class="section-actionbar-itm"><i class="fas fa-filter"></i> Filter</div>
-                <div style="cursor: pointer;" data-target="#newFolderModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-folder-plus"></i> New</div>
+                <div style="cursor: pointer;" data-target="#newFolderModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-folder-plus"></i> New Folder</div>
+                <div style="cursor: pointer;"  data-target="#fileUploadModal" data-toggle="modal" class="section-actionbar-itm"><i class="fas fa-cloud-upload-alt"></i> Upload File</div>
+                <div id="sortBySize" data-sortType="Asc" class="section-actionbar-itm"><i class="fa fa-sort"></i> Sort by Size</div>
+<!--                <div class="section-actionbar-itm"><i class="fas fa-filter"></i> Filter</div>-->
+
                 <div class="section-actionbar-itm">
-                    <input type="search" class="form-control p-0 m-0 text-center" style="font-size: small;" placeholder="Search Files and Folders"></div>
+                    <input type="search" class="form-control p-0 m-0 text-center" id="FilesSearch" style="font-size: small;" placeholder="Search Files and Folders"></div>
 
 
             </div>
@@ -35,7 +36,7 @@
                     <li data-folderName="home"  class="directorymain mt-2"><i class="fas fa-folder"></i> <span class="direcName"> Home <span class="deleteFolder"></span> </span>
                         <% (home_folder_items).forEach((item)=>{ %>
                         <div class="dir-Contents">
-                            <div date-Filextension="<%=item.extension%>" data-fileName="<%=item.name%>" data-fileType="<%=item.type%>" data-fileSize="<%=item.size%>" data-DownloadsCount="<%=item.downloads%>" data-FilePath="/user/<%=item.fileowner%>/download/<%=item.name%>"></div>
+                            <div date-Filextension="<%=item.extension%>" data-fileName="<%=item.name%>" data-fileType="<%=item.type%>" data-fileSize="<%=item.size%>" data-DownloadsCount="<%=item.downloads%>" data-FilePath="?owner=<%=item.fileowner%>&folder=home&file=<%=item.name%>" ></div>
                         </div>
                         <%})%>
                     </li>
@@ -50,7 +51,7 @@
 
                         <%(items.files).forEach((file)=>{%>
                         <div class="dir-Contents">
-                           <div  data-fileName="<%=file.name%>" data-fileType="<%=file.type%>" data-fileSize="<%=file.size%>" data-DownloadsCount="<%=file.downloads%>" data-FilePath="/user/<%=file.fileowner%>/download/<%=file.name%>" date-Filextension="<%=file.extension%>"></div>
+                           <div  data-fileName="<%=file.name%>" data-fileType="<%=file.type%>" data-fileSize="<%=file.size%>" data-DownloadsCount="<%=file.downloads%>" data-FilePath="?owner=<%=file.fileowner%>&folder=<%=items.folderName%>&file=<%=file.name%>" date-Filextension="<%=file.extension%>"></div>
 
                         </div>
                         <%})%>
@@ -63,8 +64,9 @@
                 </ul>
             </div>
             <div id="directoryOutput">
+
                 <div class="d-none" id="currentDir" data-pathDir="home"></div>
-                <div style="cursor: pointer" class="title_sub_sec "><i class="fas fa-home text-black-50"></i><span id="currentView" class="pl-1">Home</span></div>
+                <div style="cursor: pointer" class="title_sub_sec border border-info"><i class="fas fa-home text-black-50"></i><span id="currentView" class="pl-1">Home</span><span style="margin-left:75%;display: none" data-toggle="modal" id="folderDeteler" data-target="#deleteFolderModal" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete folder</span></div>
                 <div id="output-section">
                     <div id="output-section-text" class="d-none p-1"><h5 class='p-2 m-1 text-center'></h5></div>
                     <table class=" table   table-hover text-center">
@@ -125,6 +127,53 @@
 
     </div>
 
+<!--    Delete Folder Modal-->
+    <div id="deleteFolderModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header p-0">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body font-weight-bold text-warning">
+                    <p>Warning !<br>Deleting a folder will automatically delete all the files within that folder. This action is Irreversible,
+                        are you sure you want to proceed ?<br> Type into the input below the word  <comment><span class="bg-info text-dark p-2" id="deleteprompt"></span></comment> </p>
+                    <input class="form-control" type="text" id="verifyDeleteFolder">
+                    <button style="width: 90%;min-width: 90%;margin-left: 5%;margin-top: 40px" class="btn font-weight-bolder btn-sm bg-white text-danger d-none border border-dark" id="deleteFolder">I understand that I will loose the Folder and all its content will be lost.<br>Click here to Proceed.</button>
+
+                </div>
+<!--                <div class="modal-footer">-->
+<!--                    -->
+<!--                </div>-->
+            </div>
+
+        </div>
+    </div>
+
+    <div id="deleteFileModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header p-0">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body font-weight-bold text-danger">
+                    <p>Warning !<br>Deleting a  File permanently is Irreversible,
+                        are you sure you want to proceed ?<br> You are about to delete the file named <comment><span class="bg-white p-1"  id="deleteFileName"></span></comment></p>
+
+                    <button style="width: 90%;min-width: 90%;margin-left: 5%;margin-top: 20px" class="btn font-weight-bold btn-sm bg-warning border border-dark" id="deleteFile">Click here to delete Temporarily</button>
+                    <button style="width: 90%;min-width: 90%;margin-left: 5%;margin-top: 20px" class="btn font-weight-bold btn-sm bg-danger  border border-dark" id="deleteFileP">Click here to delete Permananetly</button>
+
+                </div>
+                <!--                <div class="modal-footer">-->
+                <!--                    -->
+                <!--                </div>-->
+            </div>
+
+        </div>
+    </div>
     <div id="newFolderModal" class="modal fade">
         <div class=" modal-dialog">
             <div class=" modal-content">
@@ -151,6 +200,7 @@
         </div>
     </div>
     <div id="csrfToken" data-csrf="<%=csrf%>" class="d-none"></div>
+    <div id="trackFileDelete" data-folder="" data-file="" class="d-none"></div>
 </div>
 
 
@@ -175,13 +225,15 @@
         let folders = document.querySelectorAll('.directorymain')
         let outputTable = document.querySelector('#output-section table')
         let outputState= document.querySelector('#output-section-text')
+        let fileDeleteTrack = document.querySelector('#trackFileDelete') //data-folder="" data-file=""
+        let deleteFbutton = document.querySelector('#folderDeteler')
 
         let table_fields ='<tr>'+
             '<th>Type</th>'+
             '<th>Name</th>'+
             '<th>Size</th>'+
             '<th>Downloads</th>'+
-            '<th>Share</th>'+
+            '<th>Share/Download</th>'+
             '<th class=" disabled">Delete</th>'+
         '</tr>'
        function outputState_show(msg,color){
@@ -196,13 +248,31 @@
        }
         outputState_show("Fetching your Documents.Please wait <i class='fa fa-spin fa-spinner'></i>",'text-info')
 
+     function deleteFiles(){
+            let fileDeleBtns = document.querySelectorAll('.deletFile')
+            fileDeleBtns.forEach((btn)=>{
+                btn.addEventListener('click',function (){
+                   let toDeleteFile  =this.getAttribute('data-fileTarget')
+                   let file  = toDeleteFile.split('-')[1]
+                   let folder = toDeleteFile.split('-')[0]
 
+                    fileDeleteTrack.setAttribute('data-folder',folder)
+                    fileDeleteTrack.setAttribute('data-file',file)
+                    document.querySelector('#deleteFileName').innerHTML = file
+                    console.log(fileDeleteTrack)
+
+                })
+            })
+     }
         //fecth home folder items and output
         folders.forEach((folder)=>{
+
             //check if its home
 
             if(folder.getAttribute('data-folderName')==='home'){
+
                 //output home table
+                deleteFbutton.style.displa = 'none'
                 outputState_hide()
                 //fecth table columns and ouput
                 let all_files = folder.querySelectorAll('.dir-Contents div')
@@ -226,7 +296,7 @@
                     filedownloads=file.getAttribute('data-DownloadsCount')
                     filetype = file.getAttribute('data-fileType')
                     filelink = String(file.getAttribute('data-FilePath'))
-
+                    let filenameonly = file.getAttribute('data-fileName')
                     filename = filename +'.'+ filextension
 
 
@@ -260,16 +330,16 @@
                          icon_to_show ='<i class="fas fa-file"></i>'
                     }
 
-
+                    let actualDataSize = file.getAttribute('data-fileSize')
 
                     prepared_table_data = prepared_table_data +
                         '<tr>'+
                         '<td>'+icon_to_show+'</td>'+
-                        '<td><a href="'+filelink+'">'+filename+'</a></td>'+
-                        '<td>'+filesize+ '</td>'+
+                        '<td><a target="_blank" href="/download'+filelink+'">'+filename+'</a></td>'+
+                        '<td data-actualSize="'+actualDataSize+'"">'+filesize+ '</td>'+
                         '<td>'+filedownloads+'</td>'+
-                        '<td title="Share"><a href="'+filelink+'"><i class="fas fa-link"></i></a></td>'+
-                        '<td style="cursor: pointer" data-fileTarget="'+folderName+'-'+filename+'"><i class="fas fa-trash text-danger"></i></td>'+
+                        '<td title="Share"><a target="_blank" href="/download'+filelink+'"><i class="fas fa-link"></i></a></td>'+
+                        '<td style="cursor: pointer" class="deletFile" data-target="#deleteFileModal" data-toggle="modal" data-fileTarget="'+folderName+'-'+filenameonly+'"><i class="fas fa-trash text-danger"></i></td>'+
                         '</tr>'
                 })
 
@@ -278,23 +348,36 @@
                     '<th>Name</th>'+
                     '<th>Size</th>'+
                     '<th>Downloads</th>'+
-                    '<th>Share</th>'+
+                    '<th>Share/Download</th>'+
                     '<th class=" disabled">Delete</th>'+
                     '</tr>'
                 outputTable.innerHTML = table_fields+prepared_table_data
+                deleteFiles()
+
 
             }
 
             folder.addEventListener('click',function(){
+           //show delete button for folder
+                document.querySelector('#sortBySize').innerHTML ='<i class="fa fa-sort"></i> Sort by Size'
+                if(folder.getAttribute('data-folderName')==='home'){
+                    deleteFbutton.style.display = 'none'
+                }else{
+                    deleteFbutton.style.marginTop = "-25px"
+                    deleteFbutton.style.width = "150px"
+                    deleteFbutton.style.marginLeft="80%"
+                    deleteFbutton.style.display = 'inherit'
+                }
 
               //empty output
                 folderTracker.setAttribute('data-pathDir',folder.getAttribute('data-folderName'))
                 viewing_folder.innerHTML = String(folder.getAttribute('data-folderName'))
+                document.querySelector('#deleteprompt').innerHTML =   document.querySelector('#currentDir').getAttribute('data-pathDir')
                 viewing_folder.style.textTransform = "capitalize"
                 outputTable.innerHTML=''
-                console.log( document.querySelector('#createLocation').innerHTML)
+
                 document.querySelector('#createLocation').innerHTML = "You are uploading to <span style='font-weight:bold'>"+String(folder.getAttribute('data-folderName'))+"</span> Folder"
-                console.log( document.querySelector('#createLocation').innerHTML)
+
                 //output home table
                 outputState_hide()
                 //fecth table columns and ouput
@@ -321,6 +404,7 @@
                         filextension= file.getAttribute('date-Filextension')
                         filedownloads=file.getAttribute('data-DownloadsCount')
                         filetype = file.getAttribute('data-fileType')
+                        let filenameOnly = file.getAttribute('data-fileName')
                         filelink = String(file.getAttribute('data-FilePath'))
 
                         filename = filename +'.'+ filextension
@@ -356,15 +440,15 @@
                             icon_to_show ='<i class="fas fa-file"></i>'
                         }
 
-
+                        let actualDataSize = file.getAttribute('data-fileSize')
                         prepared_table_data = prepared_table_data +
                             '<tr>'+
                             '<td>'+icon_to_show+'</td>'+
-                            '<td><a href="'+filelink+'">'+filename+'</a></td>'+
-                            '<td>'+filesize+ '</td>'+
+                            '<td><a target="_blank" href="/download'+filelink+'">'+filename+'</a></td>'+
+                            '<td data-actualSize="'+actualDataSize+'">'+filesize+ '</td>'+
                             '<td>'+filedownloads+'</td>'+
-                            '<td title="Share"><a href="'+filelink+'"><i class="fas fa-link"></i></a></td>'+
-                            '<td style="cursor: pointer" data-fileTarget="'+folderName+'-'+filename+'"><i class="fas fa-trash text-danger"></i></td>'+
+                            '<td title="Share"><a target="_blank" href="/download'+filelink+'"><i class="fas fa-link"></i></a></td>'+
+                            '<td style="cursor: pointer" class="deletFile" data-target="#deleteFileModal" data-toggle="modal" data-fileTarget="'+folderName+'-'+filenameOnly+'"><i class="fas fa-trash text-danger"></i></td>'+
                             '</tr>'
                     })
 
@@ -373,10 +457,11 @@
                         '<th>Name</th>'+
                         '<th>Size</th>'+
                         '<th>Downloads</th>'+
-                        '<th>Share</th>'+
+                        '<th>Share/Download</th>'+
                         '<th class=" disabled">Delete</th>'+
                         '</tr>'
                     outputTable.innerHTML = table_fields+prepared_table_data
+                    deleteFiles()
                 }
 
 
@@ -549,6 +634,218 @@
         })
 
 
+        //delete folder
+        let deletefolderButton = document.querySelector('#deleteFolder')
+        let deletefolderInput = document.querySelector('#verifyDeleteFolder')
+        deletefolderInput.addEventListener('input',function (){
+
+            let todelet = document.querySelector('#currentDir').getAttribute('data-pathDir')
+            if(todelet!=='home' && this.value===todelet){
+                //show delete Button
+                deletefolderButton.classList.remove('d-none')
+            }else{
+                deletefolderButton.classList.add('d-none')
+            }
+
+        })
+        const deleteFolderDisclaimer = deletefolderButton.innerHTML
+        deletefolderButton.addEventListener('click',function (){
+            let csrf =document.querySelector("#csrfToken").getAttribute('data-csrf')
+            let todelet = document.querySelector('#currentDir').getAttribute('data-pathDir')
+            deletefolderButton.innerHTML ="Deleting! Please wait <i class='fa fa-spin fa-spinner'></i>"
+            $.post('/users/delete/folder',"folderName="+todelet+'&csrf='+csrf,(data)=>{
+                   deletefolderButton.innerHTML="Success ! Folder has been deleted Successfully."
+                setTimeout(()=>{
+                    window.location.reload()
+                },1500)
+            }).fail((xhr)=>{
+                  deletefolderButton.innerHTML ="Failed to Delete Folder ! "+ xhr.responseText
+                setTimeout(()=>{
+                    deletefolderButton.innerHTML = deleteFolderDisclaimer
+                },5000)
+            })
+        })
+
+
+        //deletFile
+        //        fileDeleteTrack.setAttribute('data-folder',folder)
+        //fileDeleteTrack.setAttribute('data-file',name)
+
+        //delete e,porarily
+        const deleteTempFileHTML =  document.querySelector('#deleteFile').innerHTML
+        document.querySelector('#deleteFile').addEventListener('click',function(){
+
+            this.innerHTML = "Deleting File. Please wait <i class='fa fa-spin fa-spinner'></i>"
+            let csrf =document.querySelector("#csrfToken").getAttribute('data-csrf')
+            let file = fileDeleteTrack.getAttribute('data-file')
+            let folder = fileDeleteTrack.getAttribute('data-folder')
+            document.querySelector('#deleteFileP').classList.add('d-none')
+            $.post('/users/delete/file/temp','csrf='+csrf+'&file='+file+'&folder='+folder,(data)=>{
+                this.innerHTML ="Success ! File has been deleted."
+                setTimeout(()=>{
+                    window.location.reload()
+                },1500)
+            }).fail((xhr)=>{
+                this.innerHTML ="Failed to Delete ! "+ xhr.responseText
+                document.querySelector('#deleteFileP').classList.remove('d-none')
+                setTimeout(()=>{
+                    this.innerHTML = deleteTempFileHTML
+
+                },5000)
+            })
+
+        })
+        const deletePermFileHTML =  document.querySelector('#deleteFileP').innerHTML
+        document.querySelector('#deleteFileP').addEventListener('click',function(){
+
+            this.innerHTML = "Deleting File. Please wait <i class='fa fa-spin fa-spinner'></i>"
+            let csrf =document.querySelector("#csrfToken").getAttribute('data-csrf')
+            let file = fileDeleteTrack.getAttribute('data-file')
+            let folder = fileDeleteTrack.getAttribute('data-folder')
+            document.querySelector('#deleteFile').classList.add('d-none')
+            $.post('/users/delete/file/perm','csrf='+csrf+'&file='+file+'&folder='+folder,(data)=>{
+                this.innerHTML ="Success ! File has been deleted."
+                setTimeout(()=>{
+                    window.location.reload()
+                },1500)
+            }).fail((xhr)=>{
+                document.querySelector('#deleteFile').classList.remove('d-none')
+                this.innerHTML ="Failed to Delete ! "+ xhr.responseText
+                setTimeout(()=>{
+                    this.innerHTML = deletePermFileHTML
+                },5000)
+            })
+
+        })
+
+
+        //sort Functionality
+        let sortBTN = document.querySelector('#sortBySize')
+        sortBTN.addEventListener('click',function (){
+
+           let sortType = this.getAttribute('data-sorttype')
+            if(sortType.search(/Asc/i)>-1){
+                //sort assenging
+                sortBTN.innerHTML = ' <i class="fa fa-sort-up text-warning"></i> Sort by Size'
+                let allTableData =outputTable.querySelectorAll('tr')
+                let allSizes  = []
+                let sortedHTML = []
+                allTableData.forEach((data)=>{
+
+                    let size  = data.querySelectorAll('td')[2]
+                    if(size!==undefined){
+                        let sizeValue = size.getAttribute('data-actualSize')
+                        allSizes.push(sizeValue)
+                    }
+                })
+
+                //actal assending sort
+                allSizes.sort((a,b)=>{
+                    return a-b
+                })
+
+                //map the values
+                allSizes.forEach((size)=>{
+                    allTableData.forEach((tr)=>{
+                        let td = tr.querySelectorAll('td')[2]
+                        if(td!==undefined){
+                            let sze = td.getAttribute('data-actualSize')
+                            if(sze===size){
+
+
+                                sortedHTML.push('<tr>'+tr.innerHTML+'</tr>')
+                            }
+                        }
+                    })
+                })
+
+                sortedHTML = sortedHTML.join(' ')
+
+                outputTable.innerHTML = table_fields+sortedHTML
+                sortBTN.setAttribute('data-sorttype','Desc')
+            }else{
+                //sort descending
+                sortBTN.innerHTML = ' <i class="fa fa-sort-down text-warning"></i> Sort by Size'
+
+                let allTableData =outputTable.querySelectorAll('tr')
+                let allSizes  = []
+                let sortedHTML = []
+                allTableData.forEach((data)=>{
+
+                    let size  = data.querySelectorAll('td')[2]
+                    if(size!==undefined){
+                        let sizeValue = size.getAttribute('data-actualSize')
+                        allSizes.push(sizeValue)
+                    }
+                })
+
+                //actal assending sort
+                allSizes.sort((a,b)=>{
+                    return b-a
+                })
+
+                //map the values
+                allSizes.forEach((size)=>{
+                    allTableData.forEach((tr)=>{
+                        let td = tr.querySelectorAll('td')[2]
+                        if(td!==undefined){
+                            let sze = td.getAttribute('data-actualSize')
+                            if(sze===size){
+                                sortedHTML.push('<tr>'+tr.innerHTML+'</tr>')
+                            }
+                        }
+                    })
+                })
+                sortedHTML =sortedHTML.join(' ')
+                outputTable.innerHTML = table_fields+sortedHTML
+                sortBTN.setAttribute('data-sorttype','Asc')
+            }
+        })
+
+        //search Functionality
+        let defaultTable = outputTable.innerHTML
+       document.querySelector('#FilesSearch').addEventListener('input',function(){
+
+           let q =this.value
+
+           if(q.length>0){
+               let allTableData =outputTable.querySelectorAll('tr')
+               let matchingHTML = []
+
+                   allTableData.forEach((tr)=>{
+                       let td = tr.querySelectorAll('td')[1]
+
+                       if(td!==undefined){
+                        let rowValue = td.querySelectorAll('a')[0].innerHTML
+                           let to_add = '<tr>'+tr.innerHTML+'</tr>'
+
+                           var regex = new RegExp( q, "i");
+
+                        if(rowValue.search(regex)>-1){
+                            //we found a matching value
+
+                            if(matchingHTML.includes(to_add)===false){
+                                matchingHTML.push(to_add)
+                            }
+                        }
+                       }
+                   })
+
+                if(matchingHTML.length>0){
+
+
+                    matchingHTML = matchingHTML.join(' ')
+                    console.log(matchingHTML)
+                    outputTable.innerHTML = table_fields+matchingHTML
+                }
+
+           }else{
+               outputTable.innerHTML = defaultTable
+           }
+
+
+
+       })
 
     })
 

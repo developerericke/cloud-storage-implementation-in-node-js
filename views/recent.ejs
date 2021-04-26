@@ -1,0 +1,80 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawingu CLoud Storage</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+
+    <link href="/stylesheets/index.css" rel="stylesheet" type="text/css">
+    <link href="/stylesheets/recent.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div  class=" container-fluid p-0 m-0 ">
+    <div id="content-wrapper" class="p-0 m-0">
+        <%- include('./partials/nav');%>
+        <div id="content-section" class=" content-wrapper-itm ">
+            <div id="recentFiles">
+                <p style="font-size:x-large;" class="p-3 text-center alert-info font-weight-bold">Recent Files</p>
+                <% if (recentAccessed.length>0){%>
+                <table class="table">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Action</th>
+                        <th>Date Accessed</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% recentAccessed.forEach((item)=>{%>
+                    <tr>
+                        <% if(item.file!==null){ %>
+                        <td title="File" class="font-weight-bold"><i class="fa text-info fa-file"></i> <%=item.file%></td>
+                        <%}else if(item.folder!==null){%>
+                        <td title="Folder" class="font-weight-bold"><i class="fa fa-folder"></i>  <%=item.folder%></td>
+                        <%}%>
+
+                        <% if(item.action.search(/delete/i)>-1){ %>
+                        <td><i class="fa fa-minus-circle text-danger"></i> <%=item.action%></td>
+                        <%}else if(item.action.search(/create/i)>-1){ %>
+                        <td><i class="fa fa-check text-success"></i> <%=item.action%></td>
+                        <%}%>
+                        <td><%=item.date%></td>
+                    </tr>
+                    <%})%>
+                    </tbody>
+                </table>
+                <%}else{%>
+                <div class="alert alert-warning m-4 text-center">There are no recent Accessed Items to Display</div>
+                <%}%>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+<script src="/javascripts/jquery.min.js"></script>
+<script src="/javascripts/popper.min.js"></script>
+<script src="/javascripts/tether.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+<script>
+
+    document.addEventListener('DOMContentLoaded',()=>{
+
+    })
+
+</script>
+
+
+</body>
+</html>

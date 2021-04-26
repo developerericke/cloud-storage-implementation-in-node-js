@@ -1,0 +1,10 @@
+Software Installations Needed
+1 - Node js downloadable form https://nodejs.org/en/
+2 - MongoDb downloadable from (https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
+3. - Nodemon (installable from npm)
+
+Once you have installed the softwares above.
+Please setup the Mongodb user 
+
+To start the server,
+run from cmd ` nodemon app.js` and go to your browser on '127.0.0.1:8000'

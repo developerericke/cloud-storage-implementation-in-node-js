@@ -174,8 +174,21 @@ router.post('/register',(req,res,next)=>{
           } else {
             if (result.length === 0) {
               //add user
+             let new_user = {fullname:userFullname,email:userEmail,password:hash,quotaPlan:5}
+             table.insertOne(new_user,(error,response)=>{
+               if(error){
+                 console.log(error)
+                 res.status(500).send("Internal Server Error")
+               }else{
+                 if(response.insertedCount===1){
+                   res.status(200).send("Success")
+                 }else{
+                   res.status(500).send("Internal Server Error")
+                 }
 
-              res.status(200).send("Success")
+               }
+             })
+
             } else {
               //user Exists
               res.status(403).send('User already Exists')
@@ -334,7 +347,7 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
 
 
 
-  if( /[a-zA-Z]/.test(folderName)===true && folderName!==undefined){
+  if( /[a-zA-Z]/.test(folderName)===true && folderName!==undefined && folderName!=="Get Started with Mawingu"){
     let db = req.app.locals.db
     let table = db.collection('mawingu_folders')
     folderName = folderName.toLowerCase()
@@ -344,6 +357,7 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
 
     let BaseFiles = require('../app').BaseFiles
     let save_path =folderUser+ '\\'+folderName
+    let table_recent = db.collection('mawingu_recent')
 
     fse.ensureDir(BaseFiles+'\\'+save_path).then(()=>{
       const file = new File(BaseFiles+'\\'+save_path);
@@ -374,7 +388,15 @@ router.post('/new/folder',isAuthenticated,verifyCSRF,(req,res)=>{
               }else{
                 if(response.insertedCount===1){
                   //
-                  res.status(200).send()
+                  table_recent.insertOne({user:folderUser,folder:folderName,file:null,action:"Create",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                    if(error){
+                      console.log(error)
+                      res.status(200).send("Success")
+                    }else{
+                      res.status(200).send("Success")
+                    }
+                  })
+
 
                 }else{
                   res.status(403).send("Internal Server Error")
@@ -409,6 +431,7 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
 
     let db = req.app.locals.db
     let table = db.collection('mawingu_folders')
+    let table_recent =  db.collection('mawingu_recent')
     let mybaseFiles = require('../app').BaseFiles
     let save_home_path = mybaseFiles + "\\" + folderuser + '\\' + 'home'
     let folderToDo = {user: folderuser, folderName: 'home', folderPath: save_home_path, files: []}
@@ -514,7 +537,7 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                                         available_folder_files.forEach((flItem, index) => {
 
 
-                                          if (String(flItem.name) == String(fileName)) {
+                                          if (String(flItem.name) === String(fileName)) {
 
 
                                             available_folder_files.splice(index, 1)
@@ -547,7 +570,15 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                                         } else {
                                           //chech updated count
                                           if (response.result.nModified === 1) {
-                                            res.status(200).send("Success")
+                                            table_recent.insertOne({user:folderuser,folder:null,file:fileName,action:"Create",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                                              if(error){
+                                                console.log(error)
+                                                res.status(200).send("Success")
+                                              }else{
+                                                res.status(200).send("Success")
+                                              }
+                                            })
+
                                           } else {
 
 
@@ -564,12 +595,12 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                                 })
                               }).catch((error) => {
                                 //failed to move
-
-
+                                console.log(error)
                                 res.status(500).send("Failed to move")
                               })
                             })
                             .catch(err => {
+                              console.log(err)
                               res.status(500).send("Failed to move")
                             })
                       } else {
@@ -577,8 +608,6 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                           //we moved the file ,so append to User Folder
                           table.find({user: folderuser, folderName: toFolder}).toArray((error, result) => {
                             if (error) {
-
-
                               empty_Temp_on_Errors(temp_upload_folder, "Internal Server Error")
                             } else {
                               //we check if the folder exists,we can only have a single folder
@@ -588,7 +617,7 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                                   available_folder_files.forEach((flItem, index) => {
 
 
-                                    if (String(flItem.name) == String(fileName)) {
+                                    if (String(flItem.name) === String(fileName)) {
 
 
                                       available_folder_files.splice(index, 1)
@@ -621,7 +650,15 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                                   } else {
                                     //chech updated count
                                     if (response.result.nModified === 1) {
-                                      res.status(200).send("Success")
+                                      table_recent.insertOne({user:folderuser,folder:null,file:fileName,action:"Create",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                                        if(error){
+                                          console.log(error)
+                                          res.status(200).send("Success")
+                                        }else{
+                                          res.status(200).send("Success")
+                                        }
+                                      })
+
                                     } else {
 
 
@@ -640,7 +677,7 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
                           //failed to move
 
 
-                          res.status(500).send("Failed to move")
+                          res.status(500).send("Internal Server Error.Please Retry")
                         })
                       }
                     })
@@ -692,20 +729,309 @@ router.post('/new/file',isAuthenticated,checkQuotaLimit,(req,res,next)=>{
     res.status(500).send("Internal Server Error")
   }
 
-  // process.on('uncaughtException', function(err) {
-  //   // you can get all uncaught exception here.
-  //
-  //   res.status(500)
-  //   res.write("Internal Sever Error")
-  //   res.end()
-  // })
 
 
 })
 
+router.post('/delete/folder',isAuthenticated,verifyCSRF,(req,res,next)=>{
+  let folderUser = String(req.user._id)+String(req.user.email).split('@')[0]
+  let toDelete = req.body.folderName
+  let db = req.app.locals.db
+  let table = db.collection('mawingu_folders')
+  let table_recent = db.collection('mawingu_recent')
+  if(toDelete!==undefined ){
+    toDelete = toDelete.toLowerCase()
+
+    if(toDelete!=='home'){
+      let BaseFiles = require('../app').BaseFiles
+      let delete_path =BaseFiles + '\\' +folderUser+ '\\'+toDelete
+
+        table.deleteOne({user:folderUser,folderName:toDelete,folderPath:folderUser+'\\'+toDelete},(error,response)=>{
+          if(error){
+            console.log(error)
+            res.status(500).send("Internal Server Error")
+          }else{
+
+            if(response.deletedCount===1){
+              //now delete
+              fse.remove(delete_path).then(()=>{
+
+                table_recent.insertOne({user:folderUser,folder:toDelete,file:null,action:"Delete",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                  if(error){
+                    console.log(error)
+                    res.status(200).send("Success")
+                  }else{
+                    res.status(200).send("Success")
+                  }
+                })
+
+              }).catch((error)=>{
+              console.log(error)
+                res.status(200).send("Success")
+            })
+
+
+            }else{
+              res.status(500).send("Internal Server Error")
+            }
+
+          }
+        })
 
 
 
+    }else{
+      res.status(400).send("Invalid Folder")
+    }
+
+  }else{
+    res.status(400).send("Invalid Folder")
+  }
+})
+
+router.post('/delete/file/temp',isAuthenticated,verifyCSRF,(req,res)=>{
+ let folder = req.body.folder
+  let file = req.body.file
+  let folderUser = String(req.user._id)+String(req.user.email).split('@')[0]
+  if(file!==undefined && folder!==undefined && file!=='Get Started'){
+    //Fetch Folder
+    folder = folder.toLowerCase()
+    let db = req.app.locals.db
+    let table = db.collection('mawingu_folders')
+    let table_trash = db.collection('mawingu_trash')
+    let table_recent = db.collection('mawingu_recent')
+    table.find({user:folderUser,folderName:folder}).toArray((error,documents)=>{
+      if(error){
+        console.error(error)
+        res.status(500).send("Internal Server Error")
+      }else{
+
+        if(documents.length===1){
+          //Delete
+          let newFiles = []
+          let oldFiles = documents[0].files
+          let to_delete_file  =[]
+          oldFiles.forEach((oldFile)=>{
+            if(String(oldFile.name) !== String(file)){
+              newFiles.push(oldFile)
+            }else if(String(oldFile.name) === String(file)){
+              to_delete_file.push(oldFile)
+            }
+          })
+
+          table.updateOne({user:folderUser,folderName:folder},{$set:{files:newFiles}},(error,result)=>{
+            if(error){
+
+              res.status(500).send("Internal Server Error")
+            }else{
+
+              if(result.result.nModified ===1 ){
+                //we deleted so add to trash
+                table_trash.insertOne({user:folderUser,folder:folder,file:to_delete_file,is_temp:true},(error,response)=>{
+                  if(error){
+                    console.error(error)
+                    res.status(200).send("Success")
+
+                  }else{
+
+                    table_recent.insertOne({user:folderUser,folder:null,file:file,action:"Delete",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                      if(error){
+                        console.log(error)
+                        res.status(200).send("Success")
+                      }else{
+                        res.status(200).send("Success")
+                      }
+                    })
+
+                  }
+                })
+              }else{
+                console.error("Failed to  Update")
+                res.status(500).send("Internal Server Error")
+              }
+            }
+          })
+
+        }else{
+          res.status(400).send("Invalid File or Folder")
+        }
+      }
+    })
+
+
+  }else{
+    res.status(400).send("Invalid File or Folder")
+  }
+})
+
+router.post('/delete/file/perm',isAuthenticated,verifyCSRF,(req,res)=>{
+  let folder = req.body.folder
+  let file = req.body.file
+  let folderUser = String(req.user._id)+String(req.user.email).split('@')[0]
+  if(file!==undefined && folder!==undefined && file!=='Get Started'){
+    //Fetch Folder
+    folder = folder.toLowerCase()
+    let db = req.app.locals.db
+    let table = db.collection('mawingu_folders')
+    let table_trash = db.collection('mawingu_trash')
+    let table_recent = db.collection('mawingu_recent')
+    table.find({user:folderUser,folderName:folder}).toArray((error,documents)=>{
+      if(error){
+        console.error(error)
+        res.status(500).send("Internal Server Error")
+      }else{
+
+        if(documents.length===1){
+          //Delete
+          let newFiles = []
+          let oldFiles = documents[0].files
+          let to_delete_file  =[]
+          let disk_file_to_delete
+          oldFiles.forEach((oldFile)=>{
+            if(String(oldFile.name) !== String(file)){
+              newFiles.push(oldFile)
+            }else if(String(oldFile.name) === String(file)){
+              to_delete_file.push(oldFile)
+              disk_file_to_delete =  String(oldFile.name) + '.' + String(oldFile.extension)
+            }
+          })
+
+          table.updateOne({user:folderUser,folderName:folder},{$set:{files:newFiles}},(error,result)=>{
+            if(error){
+
+              res.status(500).send("Internal Server Error")
+            }else{
+
+              if(result.result.nModified ===1 ){
+                //we deleted so add to trash
+                //delete in disk and add to trash folder
+                let BaseFiles = require('../app').BaseFiles
+                let delete_path =BaseFiles + '\\' +folderUser+ '\\'+folder + '\\'+ disk_file_to_delete
+
+                fse.remove(delete_path).then(()=>{
+                  table_trash.insertOne({user:folderUser,folder:folder,file:to_delete_file,is_temp:false},(error,response)=>{
+
+                    if(error){
+                      console.error(error)
+                      res.status(200).send("Success")
+
+                    }else{
+
+                      table_recent.insertOne({user:folderUser,folder:null,file:file,action:"Delete",date:new Date().toLocaleDateString()+ " "+new Date().toLocaleTimeString()},(error,response)=>{
+                        if(error){
+                          console.log(error)
+                          res.status(200).send("Success")
+                        }else{
+                          res.status(200).send("Success")
+                        }
+                      })
+
+                    }
+                  })
+
+                }).catch((error)=>{
+                  console.log(error)
+                  res.status(200).send("Internal Server Error")
+                })
+
+             }else{
+                console.error("Failed to  Update")
+                res.status(500).send("Internal Server Error")
+              }
+            }
+          })
+
+        }else{
+          res.status(400).send("Invalid File or Folder")
+        }
+      }
+    })
+
+
+  }else{
+    res.status(400).send("Invalid File or Folder")
+  }
+})
+
+router.post('/file/restore',isAuthenticated,verifyCSRF,(req,res)=>{
+  let itemID = req.body.item
+  let db = req.app.locals.db
+  let table_folders = db.collection('mawingu_folders')
+  let table_trash = db.collection('mawingu_trash')
+  let folderUser = String(req.user._id)+String(req.user.email).split('@')[0]
+  if(itemID!==undefined){
+    itemID = objectId(itemID)
+    table_trash.find({user:folderUser,_id:itemID}).toArray((error,documents)=>{
+      if(error){
+        console.log(error)
+        res.status(500).send("Internal Server Error")
+      }else{
+        if(documents.length===1){
+          //folders
+          let folderName = documents[0].folder
+          let files= documents[0].file
+          if(documents[0].is_temp === true){
+             let update_query = {user: folderUser, folderName: folderName}
+
+             table_folders.find(update_query).toArray((error,response)=>{
+               if(error){
+                 console.log(error)
+                 res.status(500).send("Internal Server Error")
+
+               }else{
+                 if(response.length===1){
+                    let old_files = response[0].files
+                    let new_files = old_files.concat(files)
+                   //update table now
+
+                   table_folders.updateOne(update_query,{$set:{files:new_files}},(error,respose)=>{
+                     if(error){
+                       console.log(error)
+                       res.status(500).send("Internal Server Error")
+                     }else{
+                       if(respose.result.nModified ===1 ){
+
+
+                         table_trash.deleteOne({user:folderUser,_id:itemID},(error,result)=>{
+                           if(error){
+                             console.log(error)
+                             res.status(500).send("Internal Server Error")
+                           }else{
+                            if(result.deletedCount===1){
+                              res.status(200).send("Success")
+                            }else{
+                              res.status(200).send("Success")
+                            }
+                           }
+                         })
+                       }else{
+                         console.log("Nothing was updated")
+                         res.status(400).send("Failed to Restore")
+                       }
+                     }
+                   })
+                 }else{
+                   res.status(400).send("Failed to Restore")
+                 }
+
+               }
+             })
+          }else{
+            res.status(400).send("Cannot restore a Permanently deleted File")
+          }
+
+        }else{
+          res.statuss(400).send("Failed to Delete")
+        }
+
+      }
+    })
+
+  }else {
+    res.status(400).send("Cannot Find Item to Delete")
+  }
+
+})
 passport.serializeUser(function(user, done) {
   done(null, user);
 });

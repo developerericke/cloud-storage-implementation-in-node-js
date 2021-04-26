@@ -1,0 +1,88 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mawingu CLoud Storage</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+
+    <link href="/stylesheets/index.css" rel="stylesheet" type="text/css">
+    <link href="/stylesheets/trash.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div  class=" container-fluid p-0 m-0 ">
+    <div id="content-wrapper" class="p-0 m-0">
+        <%- include('./partials/nav');%>
+        <div id="content-section" class=" content-wrapper-itm ">
+
+            <div id="trash-section" >
+                <p style="font-size: x-large;" class=" text-center alert-info"><span style="text-decoration: underline;color:black">Trash Section</span>
+                </p>
+                <div id="deleted-items">
+                    <% if(deletedItems.length>0){%>
+                     <% deletedItems.forEach((item)=>{ %>
+                    <div class="deletedItem">
+                        <div class="">
+                            <!-- <i class="m-1 fas fa-trash"></i><br>  -->
+                            <div style="font-size: small;" class="font-weight-bold">File name -  <%=item.file[0].name%>.<%=item.file[0].extension%> <br> <span class="text-info" style="font-size: x-small">Folder location - <%=item.folder%>   </span></div>
+                            <span style="color: grey;font-size: small"><small>Deleted on<br><%=item.file[0].dateCreated%></small></span></div>
+                           <% if (item.is_temp === true){ %>
+                        <button data-fileToRestore="<%=item._id%>" class="btn btn-sm btn-danger restoreButton font-weight-bold m-1 text-center">Restore</button>
+                        <%}else{%>
+                         <span class="text-danger font-weight-bold pt-2" style="font-size: x-small"> Not recoverable</span>
+                        <%}%>
+                    </div>
+                        <%})%>
+                  <%}else{%>
+                 <div class="alert alert-warning">Trash is Empty</div>
+                    <%}%>
+
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+<div class="d-none" id="csrf" data-token="<%=csrf%>"></div>
+</div>
+
+
+
+<script src="/javascripts/jquery.min.js"></script>
+<script src="/javascripts/popper.min.js"></script>
+<script src="/javascripts/tether.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+<script>
+
+    document.addEventListener('DOMContentLoaded',()=>{
+   let restoreButtonS = document.querySelectorAll('.restoreButton')
+        restoreButtonS.forEach((button)=>{
+            button.addEventListener('click',function (){
+                let restoreItemId = button.getAttribute('data-fileToRestore')
+                let csrf =  document.querySelector('#csrf').getAttribute('data-token')
+                button.innerHTML = "Restoring <i class='fa fa-spin fa-spinner'></i>"
+                $.post('/users/file/restore','csrf='+csrf+'&item='+restoreItemId,()=>{
+                    button.innerHTML ="<span>Success ! Item has been Restored</span>"
+                    setTimeout(()=>{
+                        window.location.reload()
+                    },1500)
+                }).fail((xhr)=>{
+                    button.innerHTML = "Failed to Restore"
+                    setTimeout(()=>{
+                        button.innerHTML = "Restore"
+                    },3000)
+                })
+            })
+        })
+    })
+
+</script>
+
+
+</body>
+</html>

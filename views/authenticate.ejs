@@ -163,7 +163,7 @@
 
             }
             if (confirmPassword != password){
-                errorsBucket.push("Confirmation password must match the desired passwword")
+                errorsBucket.push("Confirmation password must match the desired password")
             }
 
 
@@ -177,8 +177,10 @@
                 let formData =  $('#signupForm form').serialize()
 
                 $.post('/users/register',formData,()=>{
-                    signupState.addClass('text-success').removeClass('text-danger').html('<span style="font-weight:bold">Registartion was succesfull !</span>')
-
+                    signupState.addClass('text-success').removeClass('text-danger').html('<span style="font-weight:bold"> Your have been allocated 5GB of Storage Space.Login to your account to get started</span>')
+                    setTimeout(()=>{
+                        window.location.reload()
+                    },3000)
                 }).fail((xhr,statustext,error)=>{
                     let message_to_send = 'error'
 

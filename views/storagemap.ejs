@@ -23,7 +23,15 @@
 
                 <p style="text-decoration: underline;" class="text-center font-weight-light">You usage so far is a below</p>
                 <div class="progress" style="height: 40px;">
-                    <div class="progress-bar progress-bar-animated <%if (percentageUsage>80){%>bg-danger<%}else if(percentageUsage>50 && percentageUsage <81){%>bg-warning<%}else{%> bg-info <%}%>" role="progressbar" style="width:<%=percentageUsage%>%;" aria-valuenow="<%=percentageUsage%>" aria-valuemin="0" aria-valuemax="100"><%=usedStorage%> GB of 5 GB used</div>
+                    <%if (percentageUsage >10){ %>
+                    <div class="progress-bar  progress-bar-animated <%if (percentageUsage>80){%>bg-danger<%}else if(percentageUsage>50 && percentageUsage <81){%>bg-warning<%}else{%> bg-info <%}%>" role="progressbar" style="width:<%=percentageUsage%>%;" aria-valuenow="<%=percentageUsage%>" aria-valuemin="0" aria-valuemax="100"><%=usedStorage%> GB of 5 GB used</div>
+                    <%}else if(percentageUsage>0 && percentageUsage<10){%>
+                        <div class="progress-bar  progress-bar-animated bg-success" role="progressbar" style="width:30%;" aria-valuenow="100" aria-valuemin="30" aria-valuemax="100">Less than 10% of 5 GB used</div>
+
+                    <%}else{%>
+                        <div class="progress-bar  progress-bar-animated bg-success" role="progressbar" style="width:100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">0 GB of 5 GB used</div>
+
+                    <%}%>
                 </div>
 
                 <div id="usageLog" class="mt-5 ml-3">
